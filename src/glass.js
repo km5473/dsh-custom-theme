@@ -133,5 +133,10 @@ body[data-dct-advblur] ${PANELS}::after{content:none}
    child of body carrying the _portal_ / _list_ roles). The theme left it
    translucent, so the wallpaper showed through the list; paint it with the opaque
    menu colour instead. Matched by role token, never by build hash. */
-body[data-dct-theme] > [class*="_portal_"][class*="_list_"]{background:var(--dsw-specific-menu);background-image:none;backdrop-filter:none;-webkit-backdrop-filter:none}`;
+body[data-dct-theme] > [class*="_portal_"][class*="_list_"]{background:var(--dsw-specific-menu);background-image:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+/* The permission trigger and the model / reasoning-level select are transparent
+   in the host sheet, so on the themed card they read as bare text. Give them the
+   solid hover fill. Only the colour is set: the select's chevron is a background
+   image and must survive. */
+body[data-dct-theme] ${COMPOSER_CARD}:has([class$="_input"], [class*="_input "]) :is([class$="_trigger"],[class*="_trigger "],[class$="_select"],[class*="_select "]){background-color:var(--dsw-alias-interactive-bg-hover)}`;
 }
