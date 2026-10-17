@@ -23,6 +23,15 @@ export function artCss(sources) {
   // set paints it with `button-info-fill`, which this theme maps to the pale
   // `raised` fill, so mid-run it read as washed out. Give that state the accent.
   const stop = `button${role('primary')}:is([aria-label^="停止"],[aria-label^="Stop"])`;
+  // The same button also turns into the steer action while a turn runs (label
+  // 「插话发送」/ "Steer message"), and into the queue action in queue mode. The
+  // steer state replaces the running turn's stop control, so it takes the accent
+  // too. The queue dock's per-row 插话发送 icon is a ghost button (no fill), so it
+  // only needs the accent as its icon colour — painting a filled pill there would
+  // turn a 28px icon into a block.
+  const steerLabel = `:is([aria-label^="插话"],[aria-label^="Steer"])`;
+  const steer = `button${role('primary')}${steerLabel}`;
+  const steerGhost = `button${steerLabel}:not(${role('primary')})`;
   const hello = role('fishHitbox');
   const sticker = index => `background-image:url("${individualUrls[index]}");background-size:contain;background-repeat:no-repeat;background-position:center;pointer-events:none`;
   return `
@@ -69,8 +78,10 @@ body[data-dct-stickers] ${send}::before{content:"";position:absolute;left:3px;to
 body[data-dct-stickers] ${send}::after{content:"发送";position:absolute;right:8px;top:50%;transform:translateY(-50%);font:500 13px/20px sans-serif;color:var(--dsw-alias-label-primary);pointer-events:none}
 body[data-dct-stickers] ${send}:disabled{opacity:.72}
 /* Scoped to the enabled theme so turning it off really restores the native colours. */
-body[data-dct-theme] ${stop}{background:var(--dsw-alias-brand-primary);color:var(--dsw-alias-label-primary-inverted)}
-body[data-dct-theme] ${stop}:hover:not(:disabled){background:var(--dsw-alias-button-primary-hover)}
+body[data-dct-theme] :is(${stop},${steer}){background:var(--dsw-alias-brand-primary);color:var(--dsw-alias-label-primary-inverted)}
+body[data-dct-theme] :is(${stop},${steer}):hover:not(:disabled){background:var(--dsw-alias-button-primary-hover)}
+body[data-dct-theme] ${steerGhost}{color:var(--dsw-alias-brand-primary)}
+body[data-dct-theme] ${steerGhost}:hover:not(:disabled){color:var(--dsw-alias-button-primary-hover)}
 body[data-dct-stickers] button${role('newSession')}{height:48px}
 body[data-dct-stickers] ${role('collapsed')} button${role('newSession')}{width:42px;height:42px}
 body[data-dct-stickers] ${role('collapsed')} ${newIcon}::before{width:36px;height:36px}

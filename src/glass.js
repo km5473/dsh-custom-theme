@@ -141,5 +141,19 @@ body[data-dct-advblur] ${PANELS}::after{content:none}
    are. */
 body[data-dct-theme] > [class*="_portal_"]{background:var(--dsw-alias-bg-layer-3);background-image:none;backdrop-filter:none;-webkit-backdrop-filter:none}
 body[data-dct-theme] > [class*="_portal_"]:has([class*="_optionLabel"]){background:var(--dsw-alias-bg-layer-2)}
-body[data-dct-theme] [class*="_menu"]{background:var(--dsw-alias-bg-layer-2);background-image:none;backdrop-filter:none;-webkit-backdrop-filter:none}`;
+body[data-dct-theme] [class*="_menu"]{background:var(--dsw-alias-bg-layer-2);background-image:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+/* The open-in-app split button (the folder + chevron pair in the composer path
+   bar). Its own halves are transparent in the host sheet, but the chip it is
+   mounted in carries the pale raised fill, so the pair reads as a stray card next
+   to the composer's transparent chips. Strip the fill from that whole chain and
+   keep the control's own chrome: the 0.5px outline around the split and the
+   divider between the two halves are what make it legible, so they stay.
+   Matched by the semantic \`data-open-target\` / \`menuAnchor\` hooks, never by build
+   hash; the dock, the input card, portals and the panels are excluded so their
+   fills (the info-bar capsule, the card glass) survive. */
+body[data-dct-theme] [data-open-target]{background:transparent!important;background-image:none!important;border:.5px solid var(--dsw-alias-border-l4)!important;border-radius:var(--dsw-radius-sm)}
+body[data-dct-theme] [data-open-target] > button{background:transparent!important;background-image:none!important;border:0!important}
+body[data-dct-theme] [data-open-target] > button + button{border-left:.5px solid var(--dsw-alias-border-l4)!important}
+body[data-dct-theme] [data-open-target] > button:is(:hover,:focus-visible):not(:disabled){background:var(--dsw-alias-interactive-bg-hover)!important}
+body[data-dct-theme] [class*="menuAnchor"]{background:transparent!important;background-image:none!important}`;
 }
