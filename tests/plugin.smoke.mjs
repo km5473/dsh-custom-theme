@@ -365,8 +365,8 @@ test('applying the plugin installs tokens, artwork, hero copy and the settings s
   assert.match(art.textContent, /data-dct-advblur\] :is\(\.v5IAXa_root/, 'the advanced blur ring should ship');
   assert.ok(art.textContent.includes('inset:-2px;box-sizing:border-box;padding:2px'), 'the ring should be 2px thick');
   assert.ok(art.textContent.includes('pointer-events:none;z-index:-1;backdrop-filter:blur(10px)'), 'the ring must paint under the text and blur wider than the panel material');
-  assert.ok(art.textContent.includes('> [class*="_portal_"][class*="_list_"]{background:var(--dsw-specific-menu)'), 'the portalled picker list should get an opaque surface');
-  assert.ok(art.textContent.includes('background-color:var(--dsw-alias-interactive-bg-hover)'), 'the permission and model chips should get a solid fill');
+  assert.ok(art.textContent.includes('> [class*="_portal_"][class*="_list_"],body[data-dct-theme] :is([role="menu"],[role="listbox"]){background:var(--dsw-alias-bg-module-platform)'), 'the portalled picker menus should get the themed solid surface');
+  assert.ok(!art.textContent.includes('background-color:var(--dsw-alias-interactive-bg-hover)'), 'the picker triggers must be left alone');
   assert.ok(!art.textContent.includes('--dct-edge-filter'), 'the liquid glass rim must be gone');
   assert.ok(!art.textContent.includes('corner-shape:superellipse'), 'the liquid glass silhouette must be gone');
   assert.equal(dom.body.getAttribute('data-dct-material'), 'gaussian', 'the blur is on by default');
