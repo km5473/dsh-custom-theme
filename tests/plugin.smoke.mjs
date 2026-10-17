@@ -367,6 +367,7 @@ test('applying the plugin installs tokens, artwork, hero copy and the settings s
   assert.ok(art.textContent.includes('pointer-events:none;z-index:-1;backdrop-filter:blur(10px)'), 'the ring must paint under the text and blur wider than the panel material');
   assert.ok(art.textContent.includes('> [class*="_portal_"]{background:var(--dsw-alias-bg-layer-3)'), 'portalled popovers (the plus menu) should sit on the elevated fill');
   assert.ok(art.textContent.includes('> [class*="_portal_"][class*="_list_"],body[data-dct-theme] :is([role="menu"],[role="listbox"]){background:var(--dsw-alias-bg-layer-2)'), 'picker lists should narrow to the raised fill');
+  assert.ok(art.textContent.includes('body[data-dct-theme] [class*="_menu"]{background:var(--dsw-alias-bg-layer-2)'), 'the model picker menu (its own portal, no _portal_ wrapper) must be solid too');
   assert.ok(!art.textContent.includes('background-color:var(--dsw-alias-interactive-bg-hover)'), 'the picker triggers must be left alone');
   assert.ok(!art.textContent.includes('--dct-edge-filter'), 'the liquid glass rim must be gone');
   assert.ok(!art.textContent.includes('corner-shape:superellipse'), 'the liquid glass silhouette must be gone');
