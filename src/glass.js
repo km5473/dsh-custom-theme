@@ -137,5 +137,5 @@ body[data-dct-advblur] ${PANELS}::after{content:none}
    with menu / listbox roles, and the theme left them translucent so the wallpaper
    showed through. Paint those surfaces with the palette's sidebar tint — solid and
    in keeping with the rest of the theme. The triggers outside are untouched. */
-body[data-dct-theme] > [class*="_portal_"][class*="_list_"],body[data-dct-theme] :is([role="menu"],[role="listbox"]){background:var(--dsw-alias-bg-module-platform);background-image:none;backdrop-filter:none;-webkit-backdrop-filter:none}`;
+body[data-dct-theme] > [class*="_portal_"][class*="_list_"],body[data-dct-theme] :is([role="menu"],[role="listbox"]){background:var(--dsw-alias-bg-layer-2);background-image:none;backdrop-filter:none;-webkit-backdrop-filter:none}`;
 }
