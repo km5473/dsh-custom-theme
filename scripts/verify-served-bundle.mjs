@@ -67,9 +67,9 @@ const missing = markers.filter(marker => !served.includes(marker));
 if (missing.length > 0) { console.error(`FAIL: served bundle is missing ${missing.join(', ')}`); process.exit(1); }
 const absent = features.filter(([, needle]) => !served.includes(needle)).map(([label]) => label);
 if (absent.length > 0) { console.error(`FAIL: served bundle is missing ${absent.join(', ')}`); process.exit(1); }
-// The blur-band experiments and the liquid-glass material were all removed: none
-// of their markers may ship.
-for (const gone of ['dct-fade', 'dct-scroll', 'installLiquidGlassOptics', 'liquidGlassCss']) {
+// The blur-band experiments, the liquid-glass material and the old-name data
+// migration were all removed: none of their markers may ship.
+for (const gone of ['dct-fade', 'dct-scroll', 'installLiquidGlassOptics', 'liquidGlassCss', 'LEGACY_STORAGE_KEY', 'LEGACY_CUSTOM_KEY', 'LEGACY_IMAGE_DATABASE', 'LEGACY_FORMATS']) {
   if (served.includes(gone)) { console.error(`FAIL: reverted code (${gone}) is still in the bundle`); process.exit(1); }
 }
 console.log('PASS: the live host serves the deployed bundle and every expected feature is present');

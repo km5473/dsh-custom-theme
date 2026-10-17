@@ -6,9 +6,6 @@ import { PALETTE_KEYS, isColor, paletteKey } from './palette.js';
 
 /** Marker that identifies a dsh-custom-theme configuration file. */
 export const CONFIG_FORMAT = 'dsh-custom-theme';
-/** Earlier markers still accepted on import so files exported before the
- * plugin was renamed keep working. */
-export const LEGACY_FORMATS = Object.freeze(['dsh-vesna-theme']);
 /** Document revision. A newer document is refused rather than half-read.
  * New fields are additive, so an older file imports with empty names. */
 export const CONFIG_VERSION = 1;
@@ -131,7 +128,7 @@ export function parseImport(text) {
   try { data = JSON.parse(text); }
   catch { return { ok: false, reason: 'importInvalid' }; }
   if (!data || typeof data !== 'object' || Array.isArray(data)) return { ok: false, reason: 'importInvalid' };
-  if (data.format !== CONFIG_FORMAT && !LEGACY_FORMATS.includes(data.format)) return { ok: false, reason: 'importInvalid' };
+  if (data.format !== CONFIG_FORMAT) return { ok: false, reason: 'importInvalid' };
   if (data.version !== CONFIG_VERSION) return { ok: false, reason: 'importVersion' };
 
   const palette = sanitizePalette(data.palette);

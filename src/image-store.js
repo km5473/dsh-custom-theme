@@ -10,9 +10,6 @@ import { UPLOAD_LIMITS, IMAGE_LIMITS, STICKER_SLOTS } from './config.js';
 /** Object-store keys, in a fixed order so a fresh install reads predictably. */
 export const IMAGE_KEYS = Object.freeze(['wallpaper', ...Array.from({ length: STICKER_SLOTS }, (_, index) => 'sticker:' + index)]);
 
-/** IndexedDB database used before the plugin was renamed; read once for migration. */
-export const LEGACY_IMAGE_DATABASE = 'dsh-vesna-theme';
-
 /** Map a settings-card slot onto its store key.
  * @param kind - 'wallpaper' or 'sticker'.
  * @param index - sticker slot, ignored for the wallpaper.
@@ -123,16 +120,11 @@ export function downloadText(filename, text) {
 /** IndexedDB-backed store for the wallpaper and sticker bytes.
  * `load` resolves to a key→Blob map; write/remove/clear resolve to true or reject.
  *
- * When `legacyDatabase` names an earlier plugin's database and this store is
- * still empty, its entries are copied forward on the first load, so renaming
- * the plugin does not discard artwork the user already chose.
- *
- * @param options - `{ database, legacyDatabase }`.
+ * @param options - `{ database }`.
  * @returns the store adapter consumed by the controller.
  */
 export function createIndexedImageStore(options = {}) {
   const database = options.database ?? 'dsh-custom-theme';
-  const legacyDatabase = options.legacyDatabase;
   const store = 'assets';
   let opening;
   const open = () => opening ??= new Promise((resolve, reject) => {
@@ -176,37 +168,8 @@ export function createIndexedImageStore(options = {}) {
     tx.onerror = () => reject(tx.error ?? new Error('Image storage could not be read'));
   });
 
-  /** Entries from a pre-rename database, or {} when it cannot be inspected.
-   * `indexedDB.databases()` is required so a missing legacy database is never
-   * created just by looking for it. */
-  const readLegacy = async () => {
-    if (!legacyDatabase || typeof indexedDB.databases !== 'function') return {};
-    let names;
-    try { names = (await indexedDB.databases()).map(entry => entry?.name); }
-    catch { return {}; }
-    if (!names.includes(legacyDatabase)) return {};
-    const db = await new Promise((resolve, reject) => {
-      const request = indexedDB.open(legacyDatabase);
-      request.onsuccess = () => resolve(request.result);
-      request.onerror = () => reject(request.error ?? new Error('Previous image storage could not be opened'));
-    });
-    try {
-      if (!db.objectStoreNames.contains(store)) return {};
-      return await readAll(db);
-    } finally { db.close(); }
-  };
-
   return {
-    async load() {
-      const stored = await readAll(await open());
-      if (Object.keys(stored).length > 0) return stored;
-      const previous = await readLegacy();
-      const carried = Object.entries(previous);
-      if (carried.length === 0) return stored;
-      // Copy first, report second: a half-finished migration must not lose bytes.
-      await transaction('readwrite', objectStore => { for (const [key, blob] of carried) objectStore.put(blob, key); });
-      return previous;
-    },
+    async load() { return await readAll(await open()); },
     async write(key, blob) { return await transaction('readwrite', objectStore => { objectStore.put(blob, key); }); },
     async remove(key) { return await transaction('readwrite', objectStore => { objectStore.delete(key); }); },
     async clear() { return await transaction('readwrite', objectStore => { objectStore.clear(); }); }

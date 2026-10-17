@@ -3,7 +3,7 @@ import { createController, STORAGE_KEY } from './controller.js';
 import { artCss, installHeroCopy, installButtonPreviews } from './art.js';
 import { gaussianGlassCss, createPanelBlurManager, pageEffectCss } from './glass.js';
 import { buildExport, parseImport, STICKER_SLOTS, MODE_KEYS, NAME_LIMIT } from './config.js';
-import { createIndexedImageStore, normalizeImage, blobToDataUrl, dataUrlToBlob, downloadText, LEGACY_IMAGE_DATABASE } from './image-store.js';
+import { createIndexedImageStore, normalizeImage, blobToDataUrl, dataUrlToBlob, downloadText } from './image-store.js';
 
 export const inject = ['theme', 'slots', 'locale'];
 
@@ -293,7 +293,7 @@ export function applyClient(ctx, React, css, assets) {
 
   ctx.effect(() => {
     try { storage = window.localStorage; } catch { /* Browsers may block local storage. The controller reports session-only saving. */ }
-    controller = createController(ctx.theme, storage, { imageStore:createIndexedImageStore({ legacyDatabase:LEGACY_IMAGE_DATABASE }) });
+    controller = createController(ctx.theme, storage, { imageStore:createIndexedImageStore() });
     return () => controller.dispose();
   });
   ctx.on('theme/change', () => controller.syncTheme());

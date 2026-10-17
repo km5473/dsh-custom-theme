@@ -1,13 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createController, STORAGE_KEY, CUSTOM_KEY, LEGACY_STORAGE_KEY, LEGACY_CUSTOM_KEY } from '../src/controller.js';
+import { createController, STORAGE_KEY, CUSTOM_KEY } from '../src/controller.js';
 import { PALETTES, PALETTE_KEYS, OVERRIDES, resolvePalettes } from '../src/palette.js';
 import { buildExport, parseImport, sanitizeText, sanitizePalette, sanitizeStickerNames, sanitizeModeNames, TEXT_LIMITS, NAME_LIMIT } from '../src/config.js';
 
-function fixture(preference=null, custom=null, legacy=false) {
+function fixture(preference=null, custom=null) {
   const data=new Map();
-  if (preference!==null) data.set(legacy?LEGACY_STORAGE_KEY:STORAGE_KEY,preference);
-  if (custom!==null) data.set(legacy?LEGACY_CUSTOM_KEY:CUSTOM_KEY,custom);
+  if (preference!==null) data.set(STORAGE_KEY,preference);
+  if (custom!==null) data.set(CUSTOM_KEY,custom);
   const storage={getItem:key=>data.get(key)??null,setItem:(key,value)=>data.set(key,value)};
   const layers=new Map(); let preferenceMode='system'; let scheme='light'; let releaseCount=0;
   const theme={getTheme:()=>({preference:preferenceMode,active:{colorScheme:scheme,tokens:{}}}),setTheme:mode=>{preferenceMode=mode;scheme=mode==='dark'?'dark':'light';},overrideTokens:(source,tokens)=>{const entry={tokens};layers.set(source,entry);return()=>{if(layers.get(source)===entry){layers.delete(source);releaseCount++;}};}};
@@ -130,9 +130,6 @@ test('an old exported file imports its auxiliary colors under the new names',()=
   const parsed=parseImport(JSON.stringify({format:'dsh-custom-theme',version:1,palette:{light:{pink:'#AABBCC',accent:'#010203'}}}));
   assert.equal(parsed.ok,true);
   assert.deepEqual(parsed.config.palette.light,{support1:'#aabbcc',accent:'#010203'});
-  const legacy=parseImport(JSON.stringify({format:'dsh-vesna-theme',version:1,palette:{dark:{gold:'#0f0f0f'}}}));
-  assert.equal(legacy.ok,true);
-  assert.deepEqual(legacy.config.palette.dark,{support2:'#0f0f0f'});
 });
 test('a malformed auxiliary color under either name is still refused',()=>{
   assert.deepEqual(parseImport(JSON.stringify({format:'dsh-custom-theme',version:1,palette:{light:{pink:'red'}}})),{ok:false,reason:'importInvalid'});
@@ -288,12 +285,12 @@ test('export then import round-trips colors, copy, names and images',async()=>{
   assert.deepEqual(JSON.parse(g.data.get(CUSTOM_KEY)).palette.light,{accent:'#123456'});
   assert.deepEqual(JSON.parse(g.data.get(CUSTOM_KEY)).stickerNames[0],'打招呼');
 });
-test('a file exported before the rename still imports, and names default to empty',()=>{
-  const legacy=parseImport(JSON.stringify({format:'dsh-vesna-theme',version:1,title:'旧文件',palette:{light:{accent:'#010203'}}}));
-  assert.equal(legacy.ok,true);
-  assert.equal(legacy.config.title,'旧文件');
-  assert.deepEqual(legacy.config.modeNames,{light:'',dark:''});
-  assert.deepEqual(legacy.config.stickerNames,['','','','','','']);
+test('a file without names imports with empty names',()=>{
+  const parsed=parseImport(JSON.stringify({format:'dsh-custom-theme',version:1,title:'只有标题',palette:{light:{accent:'#010203'}}}));
+  assert.equal(parsed.ok,true);
+  assert.equal(parsed.config.title,'只有标题');
+  assert.deepEqual(parsed.config.modeNames,{light:'',dark:''});
+  assert.deepEqual(parsed.config.stickerNames,['','','','','','']);
 });
 test('import validation refuses foreign, newer, malformed and oversized files',()=>{
   const bad=[
@@ -389,35 +386,7 @@ test('sticker names persist per slot and only accept real slots',()=>{
   assert.deepEqual([...next.getSnapshot().stickerNames],['','','','','','']);
 });
 
-// ---- migration from the previous plugin name -----------------------------
-
-test('records written under the old plugin name are adopted and rewritten once',()=>{
-  const f=fixture(JSON.stringify({version:1,enabled:true,wallpaper:false,stickers:true}),
-                  JSON.stringify({version:1,palette:{light:{accent:'#abcdef'}},title:'旧标题',greeting:'旧问候',modeNames:{light:'旧浅'},stickerNames:['旧表情']}),
-                  true);
-  const c=createController(f.theme,f.storage);
-  assert.equal(c.getSnapshot().wallpaper,false);
-  assert.equal(c.getSnapshot().palette.light.accent,'#abcdef');
-  assert.equal(c.getSnapshot().title,'旧标题');
-  assert.equal(c.getSnapshot().greeting,'旧问候');
-  assert.equal(c.getSnapshot().modeNames.light,'旧浅');
-  assert.equal(c.getSnapshot().stickerNames[0],'旧表情');
-  // The legacy values are now the current records, so the fallback never runs again.
-  assert.equal(JSON.parse(f.data.get(STORAGE_KEY)).wallpaper,false);
-  assert.equal(JSON.parse(f.data.get(CUSTOM_KEY)).palette.light.accent,'#abcdef');
-  assert.equal(JSON.parse(f.data.get(CUSTOM_KEY)).stickerNames[0],'旧表情');
-  assert.deepEqual(c.getSnapshot().colors,{light:{accent:'#abcdef'},dark:{}});
-});
-test('a current record wins over a leftover legacy one',()=>{
-  const f=fixture(JSON.stringify({version:1,enabled:false}),JSON.stringify({version:1,title:'新标题'}));
-  f.data.set(LEGACY_STORAGE_KEY,JSON.stringify({version:1,enabled:true}));
-  f.data.set(LEGACY_CUSTOM_KEY,JSON.stringify({version:1,title:'旧标题'}));
-  const c=createController(f.theme,f.storage);
-  assert.equal(c.getSnapshot().enabled,false);
-  assert.equal(c.getSnapshot().title,'新标题');
-  assert.equal(f.data.get(LEGACY_CUSTOM_KEY),JSON.stringify({version:1,title:'旧标题'}));
-});
-test('an unreadable storage layer does not attempt a migration write',()=>{
+test('an unreadable storage layer reports it and keeps the built-in look',()=>{
   const f=fixture();f.storage.getItem=()=>{throw new Error('blocked');};f.storage.setItem=()=>{throw new Error('blocked');};
   const c=createController(f.theme,f.storage);
   assert.equal(c.getSnapshot().storageState,'unavailable');

@@ -4,13 +4,9 @@ import { imageKey } from './image-store.js';
 
 /** Persisted theme toggles and native scheme preference. */
 export const STORAGE_KEY = 'dsh-custom-theme.preference.v1';
-/** Record written before the plugin was renamed; read once, then migrated. */
-export const LEGACY_STORAGE_KEY = 'dsh-vesna-theme.preference.v1';
 /** Persisted customization record: colors, copy and names. Image bytes live in
  * IndexedDB, keyed separately, because localStorage cannot hold them. */
 export const CUSTOM_KEY = 'dsh-custom-theme.custom.v1';
-/** Pre-rename customization record. */
-export const LEGACY_CUSTOM_KEY = 'dsh-vesna-theme.custom.v1';
 /** Owner id of the ThemeRuntime override layer. */
 export const SOURCE_ID = 'dsh-custom-theme';
 /** Chat-panel effect switch: `true` paints the message panels with the static
@@ -42,9 +38,6 @@ function readPanelBlur(data) {
  * values persist synchronously to localStorage; image bytes persist
  * asynchronously to the injected store and republish once loaded.
  *
- * Records written under the previous plugin name are adopted once and rewritten
- * under the current keys, so renaming the plugin never resets the user's look.
- *
  * @param theme - the ThemeRuntime service (`getTheme`, `setTheme`, `overrideTokens`).
  * @param storage - a localStorage-shaped object, or null when the browser blocks it.
  * @param options - `{ imageStore }`; a store with `load/write/remove/clear`.
@@ -73,30 +66,22 @@ export function createController(theme, storage, options = {}) {
   let images = EMPTY_IMAGES();
   let imageState = imageStore ? 'loading' : 'unavailable';
   let notice = '';
-  let migrated = false;
 
-  /** Read the current record, falling back to the pre-rename one once. */
-  function readRaw(primary, legacy) {
-    let raw;
-    try { raw = storage.getItem(primary); }
+  /** Read a persisted record, or null when the storage layer is unavailable. */
+  function readRaw(key) {
+    try { return storage.getItem(key); }
     catch { storageState = 'unavailable'; return null; }
-    if (raw !== null) return raw;
-    try {
-      const old = storage.getItem(legacy);
-      if (old !== null) { migrated = true; return old; }
-    } catch { storageState = 'unavailable'; }
-    return null;
   }
 
   function readPreference() {
     if (!storage) { storageState = 'unavailable'; return; }
-    const raw = readRaw(STORAGE_KEY, LEGACY_STORAGE_KEY);
+    const raw = readRaw(STORAGE_KEY);
     if (raw === null) return;
     let data;
     try { data = JSON.parse(raw); }
-    catch { storageState = 'invalid'; enabled = false; migrated = false; return; }
-    if (!data || data.version !== 1) { storageState = 'newer'; readOnly = true; enabled = false; migrated = false; return; }
-    if (typeof data.enabled !== 'boolean') { storageState = 'invalid'; enabled = false; migrated = false; return; }
+    catch { storageState = 'invalid'; enabled = false; return; }
+    if (!data || data.version !== 1) { storageState = 'newer'; readOnly = true; enabled = false; return; }
+    if (typeof data.enabled !== 'boolean') { storageState = 'invalid'; enabled = false; return; }
     enabled = data.enabled;
     wallpaper = typeof data.wallpaper === 'boolean' ? data.wallpaper : true;
     stickers = typeof data.stickers === 'boolean' ? data.stickers : true;
@@ -106,19 +91,18 @@ export function createController(theme, storage, options = {}) {
 
   function readCustom() {
     if (!storage) return;
-    const raw = readRaw(CUSTOM_KEY, LEGACY_CUSTOM_KEY);
+    const raw = readRaw(CUSTOM_KEY);
     if (raw === null) return;
     let data;
     // A corrupt customization record must never take the theme down with it:
     // only the record is dropped, and the shipped colors stay in force.
     try { data = JSON.parse(raw); }
-    catch { migrated = false; return; }
-    if (!data || typeof data !== 'object') { migrated = false; return; }
+    catch { return; }
+    if (!data || typeof data !== 'object') return;
     // A newer record belongs to a later plugin version: leave it untouched and
     // say so, so this session's edits stay temporary instead of half-overwriting it.
     if (data.version !== 1) {
       if (typeof data.version === 'number' && data.version > 1) { readOnly = true; storageState = 'newer'; }
-      migrated = false;
       return;
     }
     colors = sanitizePalette(data.palette);
@@ -130,16 +114,9 @@ export function createController(theme, storage, options = {}) {
   }
 
   function read() {
-    migrated = false;
     readPreference();
-    const fromPreference = migrated;
     readCustom();
-    const fromCustom = migrated;
     palette = resolvePalettes(colors);
-    if (readOnly || !storage) return;
-    // Rewrite once under the current keys, so the fallback never runs again.
-    if (fromPreference) persist();
-    if (fromCustom) persistCustom();
   }
 
   function persist() {

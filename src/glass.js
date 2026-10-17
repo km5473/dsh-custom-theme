@@ -2,8 +2,8 @@
 //
 // Two things live here:
 //
-//  1. `gaussianGlassCss` — the "chat bubble" panel styling, ported from
-//     dsh-vesna-theme 0.3.4 onto this plugin's `data-dct-*` markers: a static
+//  1. `gaussianGlassCss` — the "chat bubble" panel styling, ported from the
+//     upstream project's 0.3.4 onto this plugin's `data-dct-*` markers: a static
 //     blur with no canvas, SVG filter or pointer animation, so it stays cheap
 //     while scrolling. It is gated on `data-dct-material`, the marker the panel
 //     switch owns. The upstream liquid-glass rim was dropped — the settings card
