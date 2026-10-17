@@ -1,0 +1,24 @@
+{
+  "name": "dsh-custom-theme",
+  "version": "0.4.5",
+  "description": "可自定义的 DSH 外观主题：壁纸、明暗两套配色（十六进制）、主题名称与描述、欢迎语、明暗模式名称、六款表情与表情名称，均可改并支持配置文件导入导出；聊天框效果为高斯模糊开关 + 高级模糊开关（每条消息卡片外圈一层更宽的高斯模糊边框），发送框带 3px 高斯模糊，底部信息栏为侧栏同色的胶囊",
+  "type": "module",
+  "author": "km5473",
+  "license": "MIT",
+  "repository": { "type": "git", "url": "https://github.com/km5473/dsh-custom-theme.git" },
+  "homepage": "https://github.com/km5473/dsh-custom-theme#readme",
+  "main": "lib/index.js",
+  "exports": { ".": "./lib/index.js", "./client": "./lib/client.js", "./package.json": "./package.json" },
+  "files": ["lib", "src", "scripts", "tests", "assets", "cordis.patch.yml", "README.md", "LICENSE"],
+  "dsh": {
+    "bundle": { "patch": "./cordis.patch.yml" },
+    "client": {
+      "platform": "web",
+      "inject": ["@deepseek-ai/dsh-client-ui-theme", "@deepseek-ai/dsh-client-ui-settings-general", "@deepseek-ai/dsh-client-locale"]
+    }
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test tests/controller.test.mjs tests/plugin.smoke.mjs"
+  }
+}

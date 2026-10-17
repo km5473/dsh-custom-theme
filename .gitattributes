@@ -1,0 +1,9 @@
+# 源码统一 LF：构建产物会内联源码文本，行尾差异会改变 bundle 字节
+* text=auto eol=lf
+
+# 素材保持二进制
+*.webp binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary

@@ -1,0 +1,21 @@
+# 依赖
+node_modules/
+
+# 系统 / 编辑器杂物
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# 日志与打包产物（发布物用 npm pack / tar 另出，不进版本库）
+*.log
+*.tgz
+*.tar.gz
+
+# 本地备份与临时目录
+.dsh-backup/
+
+# 说明：lib/client.js 是构建产物，但本仓库有意提交它——package.json 里没有
+# prepare/prepack 钩子，从 git 地址直接安装时需要现成的 bundle。
+# 若要改成"装的时候再构建"，请加上 "prepare": "node scripts/build.mjs" 并在此忽略 lib/client.js。
