@@ -155,5 +155,13 @@ body[data-dct-theme] [data-open-target]{background:transparent!important;backgro
 body[data-dct-theme] [data-open-target] > button{background:transparent!important;background-image:none!important;border:0!important}
 body[data-dct-theme] [data-open-target] > button + button{border-left:.5px solid var(--dsw-alias-border-l4)!important}
 body[data-dct-theme] [data-open-target] > button:is(:hover,:focus-visible):not(:disabled){background:var(--dsw-alias-interactive-bg-hover)!important}
-body[data-dct-theme] [class*="menuAnchor"]{background:transparent!important;background-image:none!important}`;
+body[data-dct-theme] [class*="menuAnchor"]{background:transparent!important;background-image:none!important}
+/* Menu panels that are not portalled straight under body (the row "more actions"
+   menu is one: its trigger is a plain ghost button, the panel mounts elsewhere) are
+   not reached by the portal rule above, so the kit's material layer keeps the
+   host's translucent menu colour and the wallpaper shows through the list. Paint
+   that layer solid with the elevated layer, the same colour the portalled menus
+   get. The shell's stylesheet has exactly one _material_ class and no installed
+   plugin renders one, so the role token cannot hit anything else. */
+body[data-dct-theme] [class*="_material_"]{background:var(--dsw-alias-bg-layer-3);background-image:none;backdrop-filter:none;-webkit-backdrop-filter:none}`;
 }
