@@ -1,4 +1,4 @@
-# dsh-custom-theme · 外观全项自定义
+# dsh-customizable-theme · 外观全项自定义
 
 为 DeepSeek Harness Web / Desktop 制作的独立可自定义主题插件。出厂外观是延续原项目（[Mahiru0427/dsh-vesna-theme](https://github.com/Mahiru0427/dsh-vesna-theme)）的青蓝与奶白的明暗双色，配一整张角色壁纸和六个卡通表情；这套外观的每一项都可以改成你自己的。
 
@@ -76,12 +76,12 @@ dsh plugin --profile web add github:km5473/dsh-custom-theme
 发布到 NPM 之后也可以直接按包名安装（插件中心收录的是这种形式）：
 
 ```text
-dsh plugin --profile web add dsh-custom-theme
+dsh plugin --profile web add dsh-customizable-theme
 ```
 
 ### 方式二：本地安装包
 
-1. 从 Releases 下载 `dsh-custom-theme-0.1.0.tar.gz`，你也可以复制项目主页让dsh帮你装。
+1. 从 Releases 下载 `dsh-customizable-theme-0.1.0.tar.gz`，你也可以复制项目主页让dsh帮你装。
 2. **设置 → 插件 → 添加插件**，选择该安装包，然后「立即启用」。
 3. **重启 DSH**：插件清单是在启动时按包名组装的，改名必须重启才生效。
 4. 重启后到 **设置 → 通用设置** 找到这张卡片。
@@ -92,7 +92,7 @@ dsh plugin --profile web add dsh-custom-theme
 
 - 临时恢复：卡片里点「默认配色」，撤下插件配色与壁纸、隐藏表情，原生明暗模式保留。
 - 清除自定义：点「恢复默认配置」，配色、文案、名称、图片回到默认状态，但主题仍是启用状态。
-- 卸载：先「默认配色」，再到插件页禁用或移除 `dsh-custom-theme`，然后重新打开窗口。自定义记录留在本机，重新安装会沿用。
+- 卸载：先「默认配色」，再到插件页禁用或移除 `dsh-customizable-theme`，然后重新打开窗口。自定义记录留在本机，重新安装会沿用。
 
 ## 原理与边界
 
