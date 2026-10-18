@@ -1,6 +1,6 @@
 {
   "name": "dsh-customizable-theme",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "可自定义的 DSH 外观主题：壁纸、明暗两套配色（十六进制）、主题名称与描述、欢迎语、明暗模式名称、六款表情与表情名称，均可改并支持配置文件导入导出；聊天框效果为高斯模糊开关 + 高级模糊开关",
   "type": "module",
   "author": "km5473",
