@@ -81,7 +81,7 @@ dsh plugin --profile web add dsh-customizable-theme
 
 ### 方式二：本地安装包
 
-1. 从 Releases 下载 `dsh-customizable-theme-0.1.0.tar.gz`，你也可以复制项目主页让dsh帮你装。
+1. 从 Releases 下载 `dsh-customizable-theme-0.1.1.tar.gz`，你也可以复制项目主页让dsh帮你装。
 2. **设置 → 插件 → 添加插件**，选择该安装包，然后「立即启用」。
 3. **重启 DSH**：插件清单是在启动时按包名组装的，改名必须重启才生效。
 4. 重启后到 **设置 → 通用设置** 找到这张卡片。
