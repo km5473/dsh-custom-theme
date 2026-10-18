@@ -58,7 +58,7 @@ const features = [
   ['Gaussian panel material', 'installGaussianMessageMarkers'],
   ['panel blur gated on the switch marker', 'data-dct-material'],
   ['advanced panel blur ring', 'data-dct-advblur'],
-  ['send-box blur', 'backdrop-filter:blur(3px)'],
+  ['panel material blur', 'backdrop-filter:blur(3px)'],
   ['info-bar capsule', '--dsw-alias-bg-module-platform'],
   ['renamed auxiliary color variables', "'--dct-support'"],
   ['legacy auxiliary key compatibility', "pink:'support1'"]
@@ -67,9 +67,10 @@ const missing = markers.filter(marker => !served.includes(marker));
 if (missing.length > 0) { console.error(`FAIL: served bundle is missing ${missing.join(', ')}`); process.exit(1); }
 const absent = features.filter(([, needle]) => !served.includes(needle)).map(([label]) => label);
 if (absent.length > 0) { console.error(`FAIL: served bundle is missing ${absent.join(', ')}`); process.exit(1); }
-// The blur-band experiments, the liquid-glass material and the old-name data
-// migration were all removed: none of their markers may ship.
-for (const gone of ['dct-fade', 'dct-scroll', 'installLiquidGlassOptics', 'liquidGlassCss', 'LEGACY_STORAGE_KEY', 'LEGACY_CUSTOM_KEY', 'LEGACY_IMAGE_DATABASE', 'LEGACY_FORMATS']) {
+// The blur-band experiments, the liquid-glass material, the old-name data
+// migration and the blurred input card (hover flicker) were all removed: none of
+// their markers may ship.
+for (const gone of ['dct-fade', 'dct-scroll', 'installLiquidGlassOptics', 'liquidGlassCss', 'LEGACY_STORAGE_KEY', 'LEGACY_CUSTOM_KEY', 'LEGACY_IMAGE_DATABASE', 'LEGACY_FORMATS', '--dct-input-glass);background-image:none;border:1px solid var(--dsw-alias-border-l2);backdrop-filter:blur(']) {
   if (served.includes(gone)) { console.error(`FAIL: reverted code (${gone}) is still in the bundle`); process.exit(1); }
 }
 console.log('PASS: the live host serves the deployed bundle and every expected feature is present');

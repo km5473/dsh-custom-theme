@@ -77,9 +77,6 @@ export function createPanelBlurManager() {
 // Page effect: the send box blur.
 // ---------------------------------------------------------------------------
 
-/** Blur applied behind the send box. Deliberately small: it is meant to soften
- * the wallpaper under a near-opaque tint, not to frost the composer. */
-export const INPUT_BLUR = 3;
 /** Pixels the input card is lifted by, so it breathes against the info bar below
  * it. Applied as a relative offset: the card is already a positioned box, and
  * `top` moves only what is painted, never the strip's layout. */
@@ -96,17 +93,16 @@ const COMPOSER_CARD = ':is([class$="_card"],[class*="_card "])';
  * row it contains, so no other module's `_dock` picks the rule up. */
 const COMPOSER_DOCK = ':is([class$="_dock"],[class*="_dock "])';
 
-/** Stylesheet for the send-box blur, which keys off `data-dct-art` (the
- * wallpaper layer): with the wallpaper off the composer keeps its plain tint and
- * no filter is applied at all. */
+/** Composer chrome. The send box is painted with a near-opaque tint and **no**
+ * backdrop filter: hovering the send / stop button repaints the card, and a
+ * filtered background makes Windows / Electron re-composite it, which shows up as
+ * the whole composer flickering (the same failure the upstream project fixed in
+ * 0.3.1). The tint alone carries the look; the wallpaper is barely visible through
+ * it anyway. */
 export function pageEffectCss() {
   return `
-/* The send box keeps its near-opaque tint and gains a small blur. Kept in one
-   rule so the tint and the blur cannot drift apart. */
-body[data-dct-art] ${COMPOSER_CARD}:has([class$="_input"], [class*="_input "]){background:var(--dct-input-glass);background-image:none;border:1px solid var(--dsw-alias-border-l2);backdrop-filter:blur(${INPUT_BLUR}px) saturate(104%);-webkit-backdrop-filter:blur(${INPUT_BLUR}px) saturate(104%)}
-@media(prefers-reduced-transparency:reduce),(forced-colors:active){
-body[data-dct-art] ${COMPOSER_CARD}:has([class$="_input"], [class*="_input "]){backdrop-filter:none;-webkit-backdrop-filter:none}
-}
+/* The send box keeps its near-opaque tint; the tint is the whole effect. */
+body[data-dct-art] ${COMPOSER_CARD}:has([class$="_input"], [class*="_input "]){background:var(--dct-input-glass);background-image:none;border:1px solid var(--dsw-alias-border-l2);backdrop-filter:none;-webkit-backdrop-filter:none}
 /* The stats line and the context ring share one capsule: it is painted on the
    composer dock, the only element that holds both, so the pill hugs them as a
    single chip instead of stopping at the stats row. Pure decoration: no event is

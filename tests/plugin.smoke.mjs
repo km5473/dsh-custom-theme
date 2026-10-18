@@ -340,19 +340,18 @@ test('applying the plugin installs tokens, artwork, hero copy and the settings s
   assert.ok(!art.textContent.includes('data:image/webp'), 'art CSS must carry blob URLs, not base64 payloads');
   assert.equal((art.textContent.match(/blob:/g) ?? []).length >= 7, true, 'expected one blob URL per sticker plus the wallpaper');
 
-  // The input card carries a small backdrop blur (the 3px send-box blur) and
-  // still a near-opaque tint: the tint is what actually hides the wallpaper
-  // behind it, so a hover repaint stays cheap.
+  // The input card keeps a near-opaque tint and no backdrop filter at all: a
+  // filtered card re-composites the whole composer on every hover repaint, which
+  // flickers the send / stop button on Windows and Electron (the failure the
+  // upstream project fixed in 0.3.1). This guard is intentional.
   const artLines = art.textContent.split('\n');
   const tints = artLines.filter(line => line.includes('--dct-input-glass:'));
   assert.equal(tints.length, 2, 'one input tint per scheme');
   assert.ok(tints.some(line => line.includes('.92')), 'the dark input tint should be near opaque');
   assert.ok(tints.some(line => line.includes('.95')), 'the light input tint should be near opaque');
   const inputCards = artLines.filter(line => line.includes('var(--dct-input-glass)') && line.includes('{'));
-  assert.equal(inputCards.length, 2, 'one tint rule in the art sheet and one blur rule in the glass sheet');
-  // The tint rule (art sheet) stays blur-free; the glass sheet adds the blur.
-  assert.ok(inputCards.some(line => !line.includes('backdrop-filter')), 'the tint rule must stay blur-free');
-  assert.ok(inputCards.some(line => /backdrop-filter:blur\(3px\)/.test(line)), 'the send box should get the 3px blur');
+  assert.equal(inputCards.length, 2, 'one tint rule in the art sheet and one in the glass sheet');
+  assert.ok(inputCards.every(line => !/backdrop-filter:blur/.test(line)), 'the input card must stay blur-free so hovering the send button does not flicker');
   // The other glass layers keep their blur.
   assert.match(art.textContent, /blur\(8px\)/, 'sidebar/top-bar/right-rail blur should stay');
 
