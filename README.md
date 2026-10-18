@@ -70,7 +70,7 @@
 ### 方式一：DSH CLI
 
 ```text
-dsh plugin --profile web add github:km5473/dsh-custom-theme
+dsh plugin --profile web add github:km5473/dsh-customizable-theme
 ```
 
 发布到 NPM 之后也可以直接按包名安装（插件中心收录的是这种形式）：
@@ -134,7 +134,7 @@ node scripts/verify-served-bundle.mjs <已安装的 lib/client.js> [origin] [ent
 ## 版权与来源
 
 - **作者**：[@km5473](https://github.com/km5473)
-- **项目主页**：[km5473/dsh-custom-theme](https://github.com/km5473/dsh-custom-theme)
+- **项目主页**：[km5473/dsh-customizable-theme](https://github.com/km5473/dsh-customizable-theme)
 - **许可**：[MIT](LICENSE) — © 2026 km5473
 - **基于**：[Mahiru0427/dsh-vesna-theme](https://github.com/Mahiru0427/dsh-vesna-theme)（原项目主页），© 2026 dsh-vesna-theme contributors
 

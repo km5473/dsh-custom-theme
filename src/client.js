@@ -11,7 +11,7 @@ export const inject = ['theme', 'slots', 'locale'];
 /** Home page of the project this plugin is derived from; credited in the card. */
 export const UPSTREAM_URL = 'https://github.com/Mahiru0427/dsh-vesna-theme';
 /** This plugin's own home page, linked from the settings card. */
-export const PROJECT_URL = 'https://github.com/km5473/dsh-custom-theme';
+export const PROJECT_URL = 'https://github.com/km5473/dsh-customizable-theme';
 
 /** Shipped greeting; replaced whenever the user sets their own. */
 export const DEFAULT_GREETING = '找我什么事呀，亲爱的朋友~';
