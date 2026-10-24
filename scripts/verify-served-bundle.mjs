@@ -60,6 +60,7 @@ const features = [
   ['advanced panel blur ring', 'data-dct-advblur'],
   ['panel material blur', 'backdrop-filter:blur(3px)'],
   ['info-bar capsule', '--dsw-alias-bg-module-platform'],
+  ['info-bar capsule dock hook', 'data-composer-dock'],
   ['renamed auxiliary color variables', "'--dct-support'"],
   ['legacy auxiliary key compatibility', "pink:'support1'"]
 ];

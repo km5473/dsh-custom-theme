@@ -24,7 +24,6 @@
 - **高级模糊**：给每条消息卡片套一圈 **2px** 的高斯模糊边框——环里的模糊半径（10px）比卡片内部（3px）更大，所以卡片边缘会多出一层更柔的毛玻璃边，以实现接近于液态玻璃的显示效果。
 - **发送框**：输入卡保留 92%／95% 的近实色底，**不加背景模糊**——加了以后悬停发送／停止按钮会让整块输入区重绘闪烁（Windows/Electron）。
 - **信息栏胶囊**：「N 轮 M 步 · x tok/s · 缓存命中 x%」那一行套上侧栏同色的胶囊底，以提升可读性。
-
 关掉「全窗口壁纸」，或点「默认配色」，上述效果一起撤下，原生界面完全回来；系统关闭透明效果时会自动调整。
 
 ### 十六进制配色
@@ -34,12 +33,11 @@
 - 输入到第六位合法数字时立即生效，色块同步更新；
 - 还没打完的中间状态会标出来，但**不会**写进设置；
 - 失焦或回车时若仍不合法，就退回原来的颜色——所以打错字不会把颜色改坏。
-
 ## 配置文件
 
 导出得到 `dsh-custom-theme-<时间>.json`：
 
-```json
+```
 {
   "format": "dsh-custom-theme",
   "version": 1,
@@ -54,7 +52,6 @@
 - 只写**自定义项**：图片是内嵌 data URL，所以一个文件就是一整套外观，换机器直接导入即可。
 - 导入是**全量替换**：文件里没有的图片会被清空。
 - 校验失败（格式不对、版本不符、颜色非法、图片过大或不是图片）会拒绝整份文件并提示，**不会**改坏现有配置。
-
 ## 数据存放
 
 | 内容 | 位置 |
@@ -69,23 +66,22 @@
 
 ### 方式一：DSH CLI
 
-```text
+```
 dsh plugin --profile web add github:km5473/dsh-customizable-theme
 ```
 
 发布到 NPM 之后也可以直接按包名安装（插件中心收录的是这种形式）：
 
-```text
+```
 dsh plugin --profile web add dsh-customizable-theme
 ```
 
 ### 方式二：本地安装包
 
-1. 从 Releases 下载 `dsh-customizable-theme-0.1.2.tar.gz`，你也可以复制项目主页让dsh帮你装。
+1. 从 Releases 下载 `dsh-customizable-theme-0.1.3.tar.gz`，你也可以复制项目主页让dsh帮你装。
 2. **设置 → 插件 → 添加插件**，选择该安装包，然后「立即启用」。
 3. **重启 DSH**：插件清单是在启动时按包名组装的，改名必须重启才生效。
 4. 重启后到 **设置 → 通用设置** 找到这张卡片。
-
 从旧名字的版本升级的话：先在旧版里导出配置，装好新包、重启，确认外观无误后再把旧插件移除，然后导入配置文件。启用开关与明暗偏好归 DSH 自己保存，重启后仍然保留。
 
 ## 卸载与恢复
@@ -93,7 +89,6 @@ dsh plugin --profile web add dsh-customizable-theme
 - 临时恢复：卡片里点「默认配色」，撤下插件配色与壁纸、隐藏表情，原生明暗模式保留。
 - 清除自定义：点「恢复默认配置」，配色、文案、名称、图片回到默认状态，但主题仍是启用状态。
 - 卸载：先「默认配色」，再到插件页禁用或移除 `dsh-customizable-theme`，然后重新打开窗口。自定义记录留在本机，重新安装会沿用。
-
 ## 原理与边界
 
 - 配色通过官方 `ThemeRuntime.overrideTokens(source, { light, dark })` 覆盖 `--dsw-alias-*` 令牌，插件不替换程序文件、不改 DOM 结构。
@@ -103,10 +98,9 @@ dsh plugin --profile web add dsh-customizable-theme
 - 表情挂在原有按钮的伪元素上，按钮的文字、快捷键、禁用状态与事件处理都会保留。
 - 错误、警告、成功与差异配色不参与覆盖，保留平台语义。
 - **停止与插话按钮全部用强调色**：修正原有项目中停止按钮不够醒目的问题。回合运行中，输入区那颗按钮会从「发送」变成「停止生成」——同一个元素，只换了标签。主题的令牌把它的填充色定成偏淡的 `raised`，所以运行中看着发灰；这条规则单独把该状态指到强调色（悬停用强调悬停色，图形用强调前景色）。它挂在 `body[data-dct-theme]` 上，跟着主题开关走，选「默认配色」时一切还原。
-
 ## 开发
 
-```text
+```
 node scripts/build.mjs                  # 生成 lib/client.js（内嵌素材，无运行时依赖）
 node tests/controller.test.mjs          # 状态、持久化与配置校验
 node tests/plugin.smoke.mjs             # 打包产物：真实渲染设置卡片
@@ -131,13 +125,25 @@ node scripts/verify-served-bundle.mjs <已安装的 lib/client.js> [origin] [ent
 | `src/glass.js` | 聊天框高斯模糊（含开关标记与标记扫描）、高级模糊环、信息栏胶囊 |
 | `src/client.js` | 设置卡片与插件装配 |
 
+## 更新记录
+
+### 0.1.3 · 2026-10-24
+
+- **适配 DSH 0.2.1**：宿主删掉了旧的 `data-composer-stats` 标记，统计信息改成 `_pill` 胶囊。信息栏胶囊改挂宿主的 `data-composer-dock`，并要求 dock 里真有统计胶囊才绘制，空 dock 不会出现空胶囊；旧宿主的标记保留兜底。
+### 0.1.2 · 2026-10-18
+
+- 上传npm
+### 0.1.1 · 2026-10-18
+
+- **修复悬停闪烁**：开启全窗口壁纸时，鼠标悬停发送／停止按钮会让输入区整块重绘闪烁（Windows/Electron）。输入卡不再叠背景模糊，只保留 92%／95% 的近实色底。
+- **包名改为 `dsh-customizable-theme`**：npm 上 `dsh-custom-theme` 已被其他项目占用；本地存储键与导出格式沿用旧名，已调好的外观不会丢。
+
 ## 版权与来源
 
 - **作者**：[@km5473](https://github.com/km5473)
 - **项目主页**：[km5473/dsh-customizable-theme](https://github.com/km5473/dsh-customizable-theme)
 - **许可**：[MIT](LICENSE) — © 2026 km5473
 - **基于**：[Mahiru0427/dsh-vesna-theme](https://github.com/Mahiru0427/dsh-vesna-theme)（原项目主页），© 2026 dsh-vesna-theme contributors
-
 原作者B站主页[Cyrefirefly](https://space.bilibili.com/1920514469?spm_id_from=333.788.upinfo.detail.click)
 
 本项目由上游主题改名而来，并在基础上扩展了配色与文案自定义、表情命名、配置导入导出；原项目的版权归原作者所有，MIT 许可的完整条款见 [LICENSE](LICENSE)。

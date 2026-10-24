@@ -306,7 +306,13 @@ test('applying the plugin installs tokens, artwork, hero copy and the settings s
   input.className = 'lXshSW_input';
   card.appendChild(input);
   const dock = makeElement('div');
-  dock.className = 'lXshSW_dock';
+  dock.className = 'uV2eYG_dock';
+  // DSH 0.2.1 marks the dock itself and renders the stats as `_pill` chips;
+  // older hosts flagged the stats row. Both hooks are exercised here.
+  dock.attributes['data-composer-dock'] = '';
+  const pill = makeElement('span');
+  pill.className = 'bOPqQW_pill';
+  dock.appendChild(pill);
   const stats = makeElement('div');
   stats.className = 'bOPqQW_root';
   stats.attributes['data-composer-stats'] = '';
@@ -354,6 +360,11 @@ test('applying the plugin installs tokens, artwork, hero copy and the settings s
   assert.ok(inputCards.every(line => !/backdrop-filter:blur/.test(line)), 'the input card must stay blur-free so hovering the send button does not flicker');
   // The other glass layers keep their blur.
   assert.match(art.textContent, /blur\(8px\)/, 'sidebar/top-bar/right-rail blur should stay');
+  // The info-bar capsule hooks the dock by its 0.2.1 `data-composer-dock` attribute
+  // (the old `data-composer-stats` row marker is gone from the host), and needs a
+  // `_pill` child so an empty dock is not painted as an empty capsule.
+  assert.ok(art.textContent.includes('[data-composer-dock]:has([class*="_pill"])'), 'the info-bar capsule must hook the 0.2.1 composer dock');
+  assert.ok(art.textContent.includes('corner-shape:round'), 'the capsule keeps its full-round corner');
 
   // The chat-panel effect: one Gaussian material, gated on the marker the switch
   // owns rather than on the wallpaper marker, so switching it off restores the
