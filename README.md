@@ -1,4 +1,5 @@
 # dsh-customizable-theme · 外观全项自定义
+[![Listed on dsh-plugin.org](https://dsh-plugin.org/badges/listed.svg)](https://dsh-plugin.org/plugins/km5473/dsh-customizable-theme)
 
 为 DeepSeek Harness Web / Desktop 制作的独立可自定义主题插件。出厂外观是延续原项目（[Mahiru0427/dsh-vesna-theme](https://github.com/Mahiru0427/dsh-vesna-theme)）的青蓝与奶白的明暗双色，配一整张角色壁纸和六个卡通表情；这套外观的每一项都可以改成你自己的。
 
