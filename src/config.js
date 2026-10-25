@@ -117,6 +117,52 @@ export function buildExport(state) {
   return document;
 }
 
+/** Whether a document carries colours only: a palette, and nothing that would
+ * overwrite artwork or copy. The card's "apply colours" import uses this so a
+ * palette file can never wipe the user's wallpaper or theme text.
+ * @param data - parsed JSON value.
+ * @returns true when only colours would change.
+ */
+export function isPaletteOnly(data) {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) return false;
+  const raw = data.palette && typeof data.palette === 'object' ? data.palette : data;
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return false;
+  if (!raw.light && !raw.dark) return false;
+  if (data.images !== undefined && data.images !== null) return false;
+  for (const field of ['title', 'description', 'greeting']) {
+    if (typeof data[field] === 'string' && data[field].trim() !== '') return false;
+  }
+  if (data.modeNames && typeof data.modeNames === 'object' && (data.modeNames.light || data.modeNames.dark)) return false;
+  if (Array.isArray(data.stickerNames) && data.stickerNames.some(value => typeof value === 'string' && value.trim() !== '')) return false;
+  return true;
+}
+
+/** Validate a colours-only document: a bare `{light,dark}` pair or the same
+ * pair under `palette`. `format` is optional, `version` is checked when present.
+ * @param text - the file's text content.
+ * @returns `{ ok: true, palette }` or `{ ok: false, reason }`.
+ */
+export function parsePaletteImport(text) {
+  if (typeof text !== 'string' || text.trim() === '') return { ok: false, reason: 'importInvalid' };
+  let data;
+  try { data = JSON.parse(text); }
+  catch { return { ok: false, reason: 'importInvalid' }; }
+  if (!isPaletteOnly(data)) return { ok: false, reason: 'importInvalid' };
+  if (data.format !== undefined && data.format !== CONFIG_FORMAT) return { ok: false, reason: 'importInvalid' };
+  if (data.version !== undefined && data.version !== CONFIG_VERSION) return { ok: false, reason: 'importVersion' };
+  const raw = data.palette && typeof data.palette === 'object' ? data.palette : data;
+  for (const mode of MODE_KEYS) {
+    const source = raw[mode];
+    if (!source || typeof source !== 'object') continue;
+    for (const key of Object.keys(source)) {
+      if (paletteKey(key) && !isColor(source[key])) return { ok: false, reason: 'importInvalid' };
+    }
+  }
+  const palette = sanitizePalette(raw);
+  if (!Object.keys(palette.light).length && !Object.keys(palette.dark).length) return { ok: false, reason: 'importInvalid' };
+  return { ok: true, palette };
+}
+
 /** Parse and fully validate an imported configuration file.
  * @param text - the file's text content.
  * @returns `{ ok: true, config }` or `{ ok: false, reason }` where reason is a

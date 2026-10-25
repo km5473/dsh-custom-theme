@@ -288,6 +288,28 @@ export function createController(theme, storage, options = {}) {
       publish();
       return true;
     },
+    /** Apply colours only. Images, copy and names are left exactly as they
+     * are, so a palette file can be handed around without carrying a wallpaper.
+     * @param patch - `{ light, dark }` maps of optional `#rrggbb` overrides.
+     * @returns true when at least one token was accepted. */
+    applyPalette(patch) {
+      if (disposed) return false;
+      const next = sanitizePalette(patch);
+      let changed = 0;
+      for (const mode of MODE_KEYS) {
+        for (const [key, value] of Object.entries(next[mode])) {
+          // Compare against the resolved look, not the override record: writing
+          // the factory value again is not a change. Shipped palettes keep their
+          // historical uppercase hex, so compare case-insensitively.
+          if (String(palette[mode][key]).toLowerCase() !== value) changed++;
+        }
+      }
+      if (changed === 0) return false;
+      colors = { light: { ...colors.light, ...next.light }, dark: { ...colors.dark, ...next.dark } };
+      palette = resolvePalettes(colors);
+      persistCustom(); reconcile();
+      return true;
+    },
     /** Apply a validated configuration document plus its decoded images.
      * @returns true when every part, including images, was applied. */
     async applyConfig(config, imageBlobs) {

@@ -2,7 +2,7 @@ import { PALETTE_KEYS, SUPPORT_KEYS } from './palette.js';
 import { createController, STORAGE_KEY } from './controller.js';
 import { artCss, installHeroCopy, installButtonPreviews } from './art.js';
 import { gaussianGlassCss, createPanelBlurManager, pageEffectCss } from './glass.js';
-import { buildExport, parseImport, STICKER_SLOTS, MODE_KEYS, NAME_LIMIT } from './config.js';
+import { buildExport, parseImport, parsePaletteImport, STICKER_SLOTS, MODE_KEYS, NAME_LIMIT } from './config.js';
 import { createIndexedImageStore, normalizeImage, blobToDataUrl, dataUrlToBlob, downloadText } from './image-store.js';
 
 export const inject = ['theme', 'slots', 'locale'];
@@ -20,8 +20,13 @@ export const dictionaries = {
   zh: { title:'薇斯纳主题', description:'青蓝与奶白，点缀珊瑚粉和淡金。', default:'默认配色', light:'春日浅色', dark:'夜宴深色', system:'跟随系统', activeLight:'当前为浅色', activeDark:'当前为深色', inactive:'已恢复默认配色', saved:'选择已保存', unavailable:'当前选择仅在本次打开期间生效，无法保存到本机。', newer:'已有较新版本的设置，本版不会覆盖；当前切换仅临时生效。', invalid:'保存的设置无法识别，已恢复默认；重新选择即可保存。', palette:'主题配色', colorTeal:'青蓝', colorWhite:'奶白', colorNavy:'深蓝' },
   en: { title:'Vesna theme', description:'Teal and ivory with coral pink and soft gold.', default:'Default colors', light:'Spring light', dark:'Evening dark', system:'Follow system', activeLight:'Light appearance', activeDark:'Dark appearance', inactive:'Default colors restored', saved:'Selection saved', unavailable:'This selection lasts for this window only. Local saving is unavailable.', newer:'Newer settings were found and will be preserved. Changes are temporary.', invalid:'Saved settings were not recognized. Choose an appearance to save again.', palette:'Theme palette', colorTeal:'Teal', colorWhite:'Ivory', colorNavy:'Navy' }
 };
+Object.assign(dictionaries.zh, { importedColours:'配色已应用，壁纸与文案未改动。', importedColoursSame:'这组配色与当前一致，未做改动。' });
+Object.assign(dictionaries.en, { importedColours:'Colours applied. Wallpaper and copy untouched.', importedColoursSame:'These colours are already applied.' });
 Object.assign(dictionaries.zh, {material:'聊天框效果',materialNote:'高斯模糊会让消息面板略微磨砂。打开「高级模糊」会在输入卡外圈再套一层更宽的模糊边框。',advancedBlur:'高级模糊',gaussian:'高斯模糊',wallpaper:'全窗口壁纸',stickers:'日常按钮表情',artNote:'侧栏与顶部采用模糊玻璃效果。表情用于新会话、主页欢迎区和发送按钮；功能文字保留。',greeting:'你好呀',thinking:'思考中',reading:'认真看书',confused:'有点迷糊',good:'做得不错',heart:'送你一颗心',customColors:'配色自定义',customCopy:'文案与名称',customImages:'图片与表情',customHint:'下面的改动只保存在本机，可随时导出成配置文件。',resetGroup:'恢复本组默认',resetOne:'清除这一项',resetAll:'恢复默认配置',themeName:'主题名称',themeDesc:'主题描述',greetingLabel:'欢迎语',lightName:'浅色名称',darkName:'深色名称',stickerName:'表情名称',colorHex:'十六进制颜色',choose:'选择图片',restore:'恢复默认',resetImages:'全部恢复默认图片',exportConfig:'导出配置',importConfig:'导入配置',exported:'配置已导出。',imported:'配置已导入。',importInvalid:'配置文件无法识别，未做任何更改。',importVersion:'配置文件版本不匹配，未做任何更改。',importImageInvalid:'配置文件里的图片无法使用，未做任何更改。',importFailed:'配置文件读取失败，未做任何更改。',exportFailed:'配置导出失败。',imageFailed:'图片保存失败，请重试。',imageTooLarge:'图片太大，请换一张更小的图片。',imageUnavailable:'当前环境无法保存图片，本次选择只临时生效。',imageNote:'图片保存在本机浏览器里，不会上传。',credit:'© 2026 km5473 · MIT 许可',homepage:'项目主页',basedOn:'基于 dsh-vesna-theme',color_base:'基底',color_surface:'卡片面',color_sidebar:'侧栏',color_raised:'浮起面',color_elevated:'高层浮层',color_text:'正文',color_secondary:'次要文字',color_tertiary:'三级文字',color_muted:'弱化文字',color_accent:'强调色',color_accentHover:'强调悬停',color_accentSoft:'强调浅底',color_onAccent:'强调文字',color_border:'边框',color_hover:'悬停底',color_code:'代码底',color_support1:'辅助色1',color_support2:'辅助色2',color_support3:'辅助色3'});
 Object.assign(dictionaries.en, {material:'Message appearance',materialNote:'Gaussian blur frosts the message panels slightly. Advanced blur wraps a wider blur ring around the input card.',advancedBlur:'Advanced blur',gaussian:'Gaussian blur',wallpaper:'Full-window wallpaper',stickers:'Chibi stickers',artNote:'Wallpaper shading follows appearance. Turn it off to keep colors only.',greeting:'Hello',thinking:'Thinking',reading:'Reading',confused:'Confused',good:'Well done',heart:'A heart for you',customColors:'Custom colors',customCopy:'Text and names',customImages:'Images and stickers',customHint:'Changes stay on this machine and can be exported as a configuration file.',resetGroup:'Reset this group',resetOne:'Clear this entry',resetAll:'Reset all customization',themeName:'Theme name',themeDesc:'Theme description',greetingLabel:'Greeting',lightName:'Light name',darkName:'Dark name',stickerName:'Sticker name',colorHex:'Hex color',choose:'Choose image',restore:'Restore default',resetImages:'Restore all images',exportConfig:'Export config',importConfig:'Import config',exported:'Configuration exported.',imported:'Configuration imported.',importInvalid:'That file was not recognized. Nothing changed.',importVersion:'That file has a different version. Nothing changed.',importImageInvalid:'The images in that file are unusable. Nothing changed.',importFailed:'That file could not be read. Nothing changed.',exportFailed:'The configuration could not be exported.',imageFailed:'The image could not be saved. Try again.',imageTooLarge:'That image is too large. Choose a smaller one.',imageUnavailable:'Images cannot be saved here, so this choice lasts for this window only.',imageNote:'Images stay in this browser and are never uploaded.',credit:'© 2026 km5473 · MIT licence',homepage:'Project page',basedOn:'based on dsh-vesna-theme',color_base:'Base',color_surface:'Card surface',color_sidebar:'Sidebar',color_raised:'Raised',color_elevated:'Elevated',color_text:'Body text',color_secondary:'Secondary text',color_tertiary:'Tertiary text',color_muted:'Dimmed text',color_accent:'Accent',color_accentHover:'Accent hover',color_accentSoft:'Accent soft',color_onAccent:'On accent',color_border:'Border',color_hover:'Hover fill',color_code:'Code fill',color_support1:'Secondary 1',color_support2:'Secondary 2',color_support3:'Secondary 3'});
+
+Object.assign(dictionaries.zh, {aiPalette:'AI 生成配色',aiIntro:'传一张角色立绘：全身或半身、背景干净，能看清头发、服装和饰物。图片只用于这次生成，不会保存成壁纸。',aiImage:'角色立绘',aiChooseImage:'选择图片',aiRemoveImage:'移除图片',aiImageNote:'图片只进入聊天框，不会保存为壁纸。',aiPrompt:'提示词',aiGuidance:'补充指导（可选）',aiGuidanceHint:'会追加到提示词末尾，例如：主色用粉色、不要紫色、更活泼。',aiGuidancePlaceholder:'例如：主色希望是粉色；不要紫色；整体更活泼一点。',aiNewChat:'请新建对话',aiNewChatHint:'先新开一个对话，再点「填入聊天框」；避免旧上下文影响配色。',aiFillChat:'填入聊天框',aiFilled:'已填入聊天框；关闭设置后发送。',aiFillFailed:'写不进聊天框，请手动复制提示词。',aiNeedImage:'先选一张角色立绘。',aiReply:'粘贴 AI 回复',aiReplyHint:'把模型返回的 JSON 粘到这里；也可以直接粘完整回复。',aiParse:'解析并填入',aiParsed:'已解析，颜色列表已更新。',aiParseFailed:'没识别到完整的 19 个颜色，检查 JSON 是否齐全。',aiParseMissing:'缺少这些颜色：',aiDownload:'不消耗 Token？下载提示词给豆包 / 千问',aiDownloaded:'提示词已下载。',aiPreview:'效果图',aiApply:'应用配色',aiApplied:'AI 配色已应用。',aiAppliedSame:'这组配色与当前一致。',aiReset:'恢复当前配色',aiClose:'关闭',aiLight:'浅色',aiDark:'深色',aiColorNote:'每个颜色可点色块取色，也可以直接改 hex。',aiPromptNote:'预填的是精简版；别删掉 19 个 token 和用途说明。'});
+Object.assign(dictionaries.en, {aiPalette:'AI palette',aiIntro:'Use a character artwork: full or half body, clean background, visible hair, outfit and ornaments. The image is only used for this generation and never saved as wallpaper.',aiImage:'Character artwork',aiChooseImage:'Choose image',aiRemoveImage:'Remove image',aiImageNote:'The image only goes to the chat box; it is never saved as wallpaper.',aiPrompt:'Prompt',aiGuidance:'Extra guidance (optional)',aiGuidanceHint:'Appended to the prompt, e.g. make pink the main colour, avoid purple, keep it lively.',aiGuidancePlaceholder:'e.g. I want pink as the main colour; no purple; make it livelier.',aiNewChat:'Start a new conversation',aiNewChatHint:'Open a new chat before filling the composer, so old context does not affect the palette.',aiFillChat:'Fill chat box',aiFilled:'Filled the chat box; close settings and send.',aiFillFailed:'Could not write to the chat box. Copy the prompt manually.',aiNeedImage:'Choose a character artwork first.',aiReply:'Paste AI reply',aiReplyHint:'Paste the JSON the model returned, or the whole reply.',aiParse:'Parse and fill',aiParsed:'Parsed. The colour grid is updated.',aiParseFailed:'No complete 19-colour palette found. Check the JSON.',aiParseMissing:'Missing colours: ',aiDownload:'Rather not spend tokens? Download the prompt for Doubao / Qwen.',aiDownloaded:'Prompt downloaded.',aiPreview:'Preview',aiApply:'Apply colours',aiApplied:'AI colours applied.',aiAppliedSame:'These colours are already applied.',aiReset:'Restore current colours',aiClose:'Close',aiLight:'Light',aiDark:'Dark',aiColorNote:'Click a swatch to pick a colour, or edit the hex.',aiPromptNote:'The compact prompt is prefilled; keep the 19 tokens and the role notes.'});
 
 const MODES = ['default', 'light', 'dark', 'system'];
 const MODE_STICKER = { default:3, light:0, dark:2, system:1 };
@@ -43,10 +48,11 @@ function stamp() {
  * @param art - live artwork accessors shared with the wallpaper presenter.
  * @returns the React component registered into the settings slot.
  */
-export function makeCard(React, art) {
+export function makeCard(React, art, chat) {
   const h = React.createElement;
   const useState = React.useState;
   const useRef = React.useRef;
+  const useEffect = React.useEffect;
   const useSyncExternalStore = React.useSyncExternalStore;
 
   /** One palette entry: a swatch, an editable hex field and a clear button.
@@ -71,9 +77,244 @@ export function makeCard(React, art) {
       overridden ? h('button', { type:'button', className:'dct-color-reset', 'aria-label':resetLabel, title:resetLabel, onClick:onClear }, '↺') : null);
   }
 
-  return function CustomThemeCard({ controller, t }) {
+  /** One compact colour row: native picker + label + hex field. */
+  function AiColorField({ label, value, onChange }) {
+    const [draft, setDraft] = useState(value);
+    const [synced, setSynced] = useState(value);
+    if (value !== synced) { setSynced(value); setDraft(value); }
+    return h('label', { className:'dct-ai-color', title:label + ' · ' + value },
+      h('input', {
+        type:'color', value, className:'dct-ai-picker', 'aria-label':label,
+        onChange:event => onChange(event.target.value)
+      }),
+      h('span', { className:'dct-ai-color-name' }, label),
+      h('input', {
+        type:'text', className:'dct-ai-hex', value:draft, maxLength:7, spellCheck:false, autoComplete:'off',
+        'aria-label':label + ' · #rrggbb',
+        onChange:event => {
+          const raw = event.target.value;
+          setDraft(raw);
+          const next = normalizeColor(raw);
+          if (next) onChange(next);
+        },
+        onBlur:() => { if (!normalizeColor(draft)) setDraft(value); },
+        onKeyDown:event => {
+          if (event.key !== 'Enter') return;
+          event.preventDefault();
+          const next = normalizeColor(draft);
+          if (next) onChange(next); else setDraft(value);
+        }
+      })
+    );
+  }
+
+  /** The AI palette dialog: artwork, compact prompt, extra guidance, editable
+   * light/dark tokens, a schematic preview and the paste-back parser. */
+  function AiPaletteDialog({ controller, t, chat, initialPalette, onClose }) {
+    const clone = palette => ({ light:{ ...palette.light }, dark:{ ...palette.dark } });
+    const [draft, setDraft] = useState(() => clone(initialPalette));
+    const [image, setImage] = useState(null);
+    const [imageUrl, setImageUrl] = useState('');
+    const [prompt, setPrompt] = useState(AI_PLUGIN_PROMPT);
+    const [guidance, setGuidance] = useState('');
+    const [reply, setReply] = useState('');
+    const [status, setStatus] = useState('');
+    const [error, setError] = useState('');
+    const [busy, setBusy] = useState(false);
+
+    useEffect(() => {
+      const onKey = event => { if (event.key === 'Escape') onClose(); };
+      document.addEventListener('keydown', onKey);
+      return () => document.removeEventListener('keydown', onKey);
+    }, [onClose]);
+
+    useEffect(() => () => { if (imageUrl) URL.revokeObjectURL(imageUrl); }, [imageUrl]);
+
+    const pickImage = async event => {
+      const file = event.target.files && event.target.files[0];
+      event.target.value = '';
+      if (!file) return;
+      setError('');
+      try {
+        const blob = await normalizeImage(file, 'wallpaper');
+        const named = new File([blob], 'ai-palette-source.webp', { type:blob.type || 'image/webp' });
+        setImage(named);
+        setImageUrl(URL.createObjectURL(named));
+      } catch (failure) {
+        setError(t(failure && failure.code === 'imageTooLarge' ? 'imageTooLarge' : 'imageFailed'));
+      }
+    };
+
+    const removeImage = () => {
+      if (imageUrl) URL.revokeObjectURL(imageUrl);
+      setImage(null); setImageUrl('');
+    };
+
+    const composePrompt = () => {
+      const extra = guidance.trim();
+      return extra ? prompt + '\n\n补充要求：\n' + extra : prompt;
+    };
+
+    const fillChat = async () => {
+      if (!image) { setError(t('aiNeedImage')); return; }
+      if (!chat || typeof chat.fill !== 'function') { setError(t('aiFillFailed')); return; }
+      setBusy(true); setError(''); setStatus('');
+      try {
+        const result = await chat.fill(composePrompt(), image);
+        if (!result || result.ok !== true) { setError(t('aiFillFailed')); return; }
+        controller.notify('aiFilled');
+        onClose();
+      } finally { setBusy(false); }
+    };
+
+    const parseReply = () => {
+      const result = parsePaletteReply(reply);
+      if (!result.ok) {
+        setStatus('');
+        if (result.reason === 'missing' && result.missing) {
+          setError(t('aiParseMissing') + result.missing.slice(0, 6).join(', ') + (result.missing.length > 6 ? '…' : ''));
+        } else setError(t('aiParseFailed'));
+        return;
+      }
+      setDraft(result.palette);
+      setError('');
+      setStatus(t('aiParsed'));
+    };
+
+    const downloadPrompt = () => {
+      const extra = guidance.trim();
+      const body = extra ? AI_EXTERNAL_PROMPT + '\n\n## 我的补充要求\n' + extra : AI_EXTERNAL_PROMPT;
+      const blob = new Blob([body], { type:'text/markdown;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url; anchor.download = AI_PROMPT_FILENAME; anchor.rel = 'noopener';
+      document.body.appendChild(anchor); anchor.click(); anchor.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 0);
+      setStatus(t('aiDownloaded'));
+    };
+
+    const apply = () => {
+      const changed = controller.applyPalette(draft);
+      controller.notify(changed ? 'aiApplied' : 'aiAppliedSame');
+      onClose();
+    };
+
+    const update = (mode, key, value) => setDraft(current => ({ ...current, [mode]:{ ...current[mode], [key]:value } }));
+
+    const modeBlock = mode => h('div', { className:'dct-ai-mode', key:mode },
+      h('div', { className:'dct-ai-mode-head' },
+        h('span', null, t(mode === 'light' ? 'aiLight' : 'aiDark')),
+        h('span', { className:'dct-ai-mode-count' }, '19')),
+      h('div', { className:'dct-ai-rows' }, PALETTE_KEYS.map(key => h(AiColorField, {
+        key, label:t('color_' + key), value:draft[mode][key],
+        onChange:value => update(mode, key, value)
+      }))));
+
+    const preview = mode => {
+      const p = draft[mode];
+      return h('div', { className:'dct-ai-preview-wrap', key:mode },
+        h('span', { className:'dct-ai-preview-label' }, t(mode === 'light' ? 'aiLight' : 'aiDark')),
+        h('div', { className:'dct-ai-preview', style:{ background:p.base, borderColor:p.border, color:p.text } },
+          h('div', { className:'dct-ai-preview-rail', style:{ background:p.sidebar } },
+            h('span', { style:{ background:p.accentSoft } }),
+            h('span', { style:{ background:p.raised } }),
+            h('span', { style:{ background:p.raised } })),
+          h('div', { className:'dct-ai-preview-body' },
+            h('div', { className:'dct-ai-preview-card', style:{ background:p.surface, borderColor:p.border } },
+              h('span', { style:{ background:p.secondary } }),
+              h('span', { style:{ background:p.tertiary, opacity:0.82 } }),
+              h('span', { style:{ background:p.muted, width:'46%' } })),
+            h('div', { className:'dct-ai-preview-actions' },
+              h('span', { className:'dct-ai-preview-code', style:{ background:p.code, color:p.tertiary } }, '{ }'),
+              h('span', { className:'dct-ai-preview-button', style:{ background:p.accent, color:p.onAccent } }, 'Aa')),
+            h('div', { className:'dct-ai-preview-dots' }, ['support1', 'support2', 'support3'].map(key => h('span', { key, style:{ background:p[key] } }))))));
+    };
+
+    return h('div', {
+      className:'dct-ai-overlay', role:'presentation',
+      onMouseDown:event => { if (event.target === event.currentTarget) onClose(); }
+    },
+      h('div', { className:'dct-ai-dialog', role:'dialog', 'aria-modal':'true', 'aria-label':t('aiPalette') },
+        h('div', { className:'dct-ai-scroll' },
+        h('div', { className:'dct-ai-head' },
+          h('div', null,
+            h('h3', null, t('aiPalette')),
+            h('p', null, t('aiIntro'))),
+          h('button', { type:'button', className:'dct-ai-close', 'aria-label':t('aiClose'), onClick:onClose },
+            h('svg', { width:14, height:14, viewBox:'0 0 14 14', 'aria-hidden':true, focusable:'false' },
+              h('path', { d:'M2.5 2.5l9 9M11.5 2.5l-9 9', fill:'none', stroke:'currentColor', strokeWidth:1.6, strokeLinecap:'round' })))),
+
+        h('div', { className:'dct-ai-section' },
+          h('div', { className:'dct-ai-image-row' },
+            imageUrl
+              ? h('img', { className:'dct-ai-thumb', src:imageUrl, alt:'', decoding:'async' })
+              : h('div', { className:'dct-ai-thumb is-empty', 'aria-hidden':true }, '✧'),
+            h('div', { className:'dct-ai-image-actions' },
+              h('label', { className:'dct-action' }, t('aiChooseImage'),
+                h('input', { type:'file', accept:'image/*', onChange:pickImage })),
+              image ? h('button', { type:'button', className:'dct-mini', onClick:removeImage }, t('aiRemoveImage')) : null,
+              h('p', { className:'dct-ai-hint' }, t('aiImageNote'))))),
+
+        h('div', { className:'dct-ai-section' },
+          h('div', { className:'dct-ai-section-head' },
+            h('h4', null, t('aiPrompt')),
+            h('span', null, t('aiPromptNote'))),
+          h('textarea', {
+            className:'dct-ai-textarea', rows:9, value:prompt, spellCheck:false,
+            onChange:event => setPrompt(event.target.value), 'aria-label':t('aiPrompt')
+          }),
+          h('div', { className:'dct-ai-guidance' },
+            h('div', { className:'dct-ai-guidance-head' },
+              h('span', null, t('aiGuidance')),
+              h('span', { className:'dct-ai-hint' }, t('aiGuidanceHint'))),
+            h('textarea', {
+              className:'dct-ai-textarea is-guidance', rows:3, value:guidance, spellCheck:false,
+              placeholder:t('aiGuidancePlaceholder'),
+              onChange:event => setGuidance(event.target.value), 'aria-label':t('aiGuidance')
+            })),
+          h('div', { className:'dct-ai-newchat' },
+            h('strong', null, t('aiNewChat')),
+            h('span', null, t('aiNewChatHint'))),
+          h('div', { className:'dct-ai-row-actions' },
+            h('button', { type:'button', className:'dct-ai-primary', disabled:busy, onClick:fillChat }, t('aiFillChat')))),
+
+        h('div', { className:'dct-ai-section' },
+          h('div', { className:'dct-ai-section-head' },
+            h('h4', null, t('aiColorNote'))),
+          h('div', { className:'dct-ai-colors' }, modeBlock('light'), modeBlock('dark'))),
+
+        h('div', { className:'dct-ai-section' },
+          h('div', { className:'dct-ai-section-head' },
+            h('h4', null, t('aiReply')),
+            h('span', null, t('aiReplyHint'))),
+          h('textarea', {
+            className:'dct-ai-textarea is-reply', rows:5, value:reply, spellCheck:false,
+            placeholder:'{"light":{...},"dark":{...}}',
+            onChange:event => setReply(event.target.value), 'aria-label':t('aiReply')
+          }),
+          h('div', { className:'dct-ai-row-actions' },
+            h('button', { type:'button', className:'dct-action', onClick:parseReply }, t('aiParse')),
+            error ? h('span', { className:'dct-ai-error' }, error) : null,
+            status ? h('span', { className:'dct-ai-ok' }, status) : null)),
+
+        h('div', { className:'dct-ai-section' },
+          h('div', { className:'dct-ai-section-head' }, h('h4', null, t('aiPreview'))),
+          h('div', { className:'dct-ai-previews' }, preview('light'), preview('dark'))),
+
+        h('p', { className:'dct-ai-fallback' },
+          h('button', { type:'button', className:'dct-ai-link', onClick:downloadPrompt }, t('aiDownload'))),
+
+        h('div', { className:'dct-ai-footer' },
+          h('button', { type:'button', className:'dct-mini', onClick:() => { setDraft(clone(initialPalette)); setError(''); setStatus(''); } }, t('aiReset')),
+          h('div', { className:'dct-ai-footer-right' },
+            h('button', { type:'button', className:'dct-mini', onClick:onClose }, t('aiClose')),
+            h('button', { type:'button', className:'dct-ai-primary', onClick:apply }, t('aiApply')))))));
+  }
+
+  return function CustomThemeCard({ controller, t, chat }) {
     const state = useSyncExternalStore(controller.subscribe, controller.getSnapshot, controller.getSnapshot);
     const [busy, setBusy] = useState(false);
+    const [aiOpen, setAiOpen] = useState(false);
     const pending = useRef(false);
     const modeLabel = mode => state.modeNames[mode] || t(mode);
     const stickerName = index => state.stickerNames[index] || t(STICKER_NAMES[index]);
@@ -125,6 +366,15 @@ export function makeCard(React, art) {
         let text;
         try { text = await file.text(); }
         catch { controller.notify('importFailed'); return; }
+        // A colours-only file merges into the current look; a full document
+        // replaces it. Try the narrow form first so a palette pack can never
+        // wipe the wallpaper or the copy by accident.
+        const colours = parsePaletteImport(text);
+        if (colours.ok) {
+          const applied = controller.applyPalette(colours.palette);
+          controller.notify(applied ? 'importedColours' : 'importedColoursSame');
+          return;
+        }
         const parsed = parseImport(text);
         if (!parsed.ok) { controller.notify(parsed.reason); return; }
         let blobs;
@@ -238,7 +488,12 @@ export function makeCard(React, art) {
           h('button', { type:'button', className:'dct-action', disabled:busy, onClick:exportConfig }, t('exportConfig')),
           h('label', { className:'dct-action' }, t('importConfig'),
             h('input', { type:'file', accept:'application/json,.json', onChange:importConfig })),
+          h('button', { type:'button', className:'dct-action dct-ai-trigger', disabled:busy, onClick:() => setAiOpen(true) }, t('aiPalette')),
           h('button', { type:'button', className:'dct-action', disabled:busy, onClick:() => run(() => controller.resetAll()) }, t('resetAll')))),
+      aiOpen ? h(AiPaletteDialog, {
+        controller, t, chat, initialPalette:state.palette,
+        onClose:() => setAiOpen(false)
+      }) : null,
       h('p', { className:'dct-status', role:'status', 'aria-live':'polite' },
         t(state.enabled ? (state.scheme === 'dark' ? 'activeDark' : 'activeLight') : 'inactive'), ' · ',
         state.notice ? t(state.notice) : t(state.storageState),
@@ -286,6 +541,33 @@ export function applyClient(ctx, React, css, assets) {
   const art = {
     wallpaper(state) { return urlFor(state.images.wallpaper) ?? ensureDefaults().wallpaper; },
     sticker(state, index) { return urlFor(state.images.stickers[index]) ?? ensureDefaults().stickers[index]; }
+  };
+
+  // The settings card talks to the live conversation only through this small
+  // bridge: prefill the composer and attach one artwork.
+  const getService = name => { try { return ctx.get(name); } catch { return undefined; } };
+  const chat = {
+    sessionId() {
+      const ui = getService('uiSession');
+      const binding = ui && ui.current && (ui.current.value !== undefined ? ui.current.value : ui.current.getSnapshot && ui.current.getSnapshot().value);
+      return binding && binding.key;
+    },
+    async fill(text, image) {
+      const conversation = getService('conversation');
+      const sessionId = this.sessionId();
+      if (!conversation || !conversation.input || typeof conversation.input.shell !== 'function' || !sessionId) return { ok:false };
+      try {
+        const shell = conversation.input.shell(sessionId);
+        if (image && typeof conversation.createDrafts === 'function') {
+          try {
+            const drafts = conversation.createDrafts(sessionId, [image]);
+            if (Array.isArray(drafts) && drafts.length) shell.addAttachments(drafts.map(draft => draft.id));
+          } catch { /* The text still lands; the user can attach the artwork manually. */ }
+        }
+        shell.setDraft(text);
+        return { ok:true };
+      } catch { return { ok:false }; }
+    }
   };
 
   ctx.effect(() => () => {
@@ -345,6 +627,6 @@ export function applyClient(ctx, React, css, assets) {
   });
   ctx.effect(() => ctx.locale.register('settings.custom-theme', dictionaries));
   ctx.slots.inject('settings.general.item', () => ctx.slots.register({
-    name:'settings.general.item', id:'custom-theme', order:12, locale:'settings.custom-theme', inject:() => ({ controller })
-  }, makeCard(React, art)));
+    name:'settings.general.item', id:'custom-theme', order:12, locale:'settings.custom-theme', inject:() => ({ controller, chat })
+  }, makeCard(React, art, chat)));
 }

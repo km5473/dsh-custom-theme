@@ -5,7 +5,7 @@ const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const pkg=JSON.parse(fs.readFileSync(path.join(root,'package.json'),'utf8'));
 // Concatenated in dependency order; imports are dropped because the factory
 // body is one scope and every declaration lands top-level there.
-const sources=['palette.js','config.js','controller.js','image-store.js','art.js','glass.js','client.js'].map(name => fs.readFileSync(path.join(root,'src',name),'utf8').replace(/^import .*;\r?\n/gm,'').replace(/^export /gm,''));
+const sources=['palette.js','config.js','controller.js','image-store.js','art.js','glass.js','ai-palette.js','client.js'].map(name => fs.readFileSync(path.join(root,'src',name),'utf8').replace(/^import .*;\r?\n/gm,'').replace(/^export /gm,''));
 const css=fs.readFileSync(path.join(root,'src/card.css'),'utf8');
 const read=name=>'data:image/webp;base64,'+fs.readFileSync(path.join(root,'assets',name+'.webp')).toString('base64');
 // Only the artwork the client actually reads is bundled: the wallpaper plus the

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createController, STORAGE_KEY, CUSTOM_KEY } from '../src/controller.js';
 import { PALETTES, PALETTE_KEYS, OVERRIDES, resolvePalettes } from '../src/palette.js';
-import { buildExport, parseImport, sanitizeText, sanitizePalette, sanitizeStickerNames, sanitizeModeNames, TEXT_LIMITS, NAME_LIMIT } from '../src/config.js';
+import { buildExport, parseImport, parsePaletteImport, sanitizeText, sanitizePalette, sanitizeStickerNames, sanitizeModeNames, TEXT_LIMITS, NAME_LIMIT } from '../src/config.js';
 
 function fixture(preference=null, custom=null) {
   const data=new Map();
@@ -423,5 +423,45 @@ test('every shipped palette exposes the same editable keys',()=>{
 test('semantic danger/success/warning/diff colors are not reclassified',()=>{
   assert.ok(Object.keys(OVERRIDES).length>50);
   for(const name of Object.keys(OVERRIDES))assert.doesNotMatch(name,/state-(error|warn|success)|diff-(added|deleted)/);
+});
+
+test('a colours-only patch merges colours and leaves copy, names and images alone', () => {
+  const f = fixture();
+  const c = createController(f.theme, f.storage, { imageStore: imageStore() });
+  c.setCopy('title', '我的主题');
+  c.setCopy('greeting', '你好');
+  c.setStickerName(0, '第一张');
+  const ok = c.applyPalette({ light: { accent: '#112233' }, dark: { base: '#101820' } });
+  assert.equal(ok, true);
+  const s = c.getSnapshot();
+  assert.equal(s.palette.light.accent, '#112233');
+  assert.equal(s.palette.dark.base, '#101820');
+  assert.equal(s.palette.light.text, PALETTES.light.text);
+  assert.equal(s.title, '我的主题');
+  assert.equal(s.greeting, '你好');
+  assert.equal(s.stickerNames[0], '第一张');
+  assert.equal(s.images.wallpaper, null);
+  c.dispose();
+});
+
+test('a colours-only patch that changes nothing reports no change', () => {
+  const f = fixture();
+  const c = createController(f.theme, f.storage);
+  assert.equal(c.applyPalette({ light: {} }), false);
+  assert.equal(c.applyPalette({ light: { accent: PALETTES.light.accent } }), false);
+  c.dispose();
+});
+
+test('parsePaletteImport takes bare and enveloped colour files only', () => {
+  const bare = parsePaletteImport(JSON.stringify({ light: { accent: '#112233' }, dark: {} }));
+  assert.equal(bare.ok, true);
+  assert.equal(bare.palette.light.accent, '#112233');
+  const enveloped = parsePaletteImport(JSON.stringify({ format: 'dsh-custom-theme', version: 1, palette: { light: { accent: '#112233' } } }));
+  assert.equal(enveloped.ok, true);
+  assert.equal(parsePaletteImport(JSON.stringify({ format: 'dsh-custom-theme', version: 2, palette: { light: { accent: '#112233' } } })).reason, 'importVersion');
+  assert.equal(parsePaletteImport(JSON.stringify({ palette: { light: { accent: 'nope' } } })).reason, 'importInvalid');
+  assert.equal(parsePaletteImport(JSON.stringify({ palette: { light: { accent: '#112233' } }, images: { wallpaper: null, stickers: [] } })).reason, 'importInvalid');
+  assert.equal(parsePaletteImport(JSON.stringify({ palette: { light: { accent: '#112233' } }, title: 'x' })).reason, 'importInvalid');
+  assert.equal(parsePaletteImport(JSON.stringify({ palette: { light: {} } })).reason, 'importInvalid');
 });
 
