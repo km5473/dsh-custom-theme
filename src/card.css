@@ -103,7 +103,7 @@
 .dct-ai-guidance-head>span:first-child{font-size:12px;font-weight:600;color:var(--dsw-alias-label-secondary)}
 .dct-ai-guidance-head .dct-ai-hint{flex:1;text-align:right}
 .dct-ai-textarea.is-guidance{min-height:64px;font-family:inherit;font-size:12px}
-.dct-ai-newchat{display:flex;align-items:baseline;gap:8px;margin-top:12px;padding:7px 10px;border:1px dashed var(--dsw-alias-brand-primary);border-radius:8px;background:var(--dsw-alias-interactive-bg-hover);font-size:11px;line-height:1.5;color:var(--dsw-alias-label-secondary)}
+.dct-ai-newchat{display:flex;align-items:baseline;gap:8px;margin:0 0 14px;padding:7px 10px;border:1px dashed var(--dsw-alias-brand-primary);border-radius:8px;background:var(--dsw-alias-interactive-bg-hover);font-size:11px;line-height:1.5;color:var(--dsw-alias-label-secondary)}
 .dct-ai-newchat strong{flex:none;font-size:12px;font-weight:600;color:var(--dsw-alias-brand-text)}
 .dct-ai-newchat span{min-width:0}
 .dct-ai-prompt-row{display:flex;align-items:flex-end;gap:10px;margin-bottom:4px}
@@ -144,7 +144,6 @@
 .dct-ai-preview-button{padding:6px 10px;border-radius:6px;font:600 10px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 .dct-ai-preview-dots{display:flex;gap:5px}
 .dct-ai-preview-dots span{width:8px;height:8px;border-radius:50%}
-.dct-ai-fallback{margin:12px 0 0;text-align:left}
 .dct-ai-link{padding:0;border:0;background:none;font:inherit;font-size:11px;line-height:1.6;color:var(--dsw-alias-brand-text);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
 .dct-ai-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;padding-top:12px;border-top:1px solid var(--dsw-alias-border-l2)}
 .dct-ai-footer-right{display:flex;gap:8px}

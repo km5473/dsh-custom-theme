@@ -119,6 +119,7 @@ export function makeCard(React, art, chat) {
     const [guidance, setGuidance] = useState('');
     const [reply, setReply] = useState('');
     const [status, setStatus] = useState('');
+    const [downloadNote, setDownloadNote] = useState('');
     const [error, setError] = useState('');
     const [busy, setBusy] = useState(false);
 
@@ -190,7 +191,7 @@ export function makeCard(React, art, chat) {
       anchor.href = url; anchor.download = AI_PROMPT_FILENAME; anchor.rel = 'noopener';
       document.body.appendChild(anchor); anchor.click(); anchor.remove();
       setTimeout(() => URL.revokeObjectURL(url), 0);
-      setStatus(t('aiDownloaded'));
+      setDownloadNote(t('aiDownloaded'));
     };
 
     const apply = () => {
@@ -256,6 +257,9 @@ export function makeCard(React, art, chat) {
               h('p', { className:'dct-ai-hint' }, t('aiImageNote'))))),
 
         h('div', { className:'dct-ai-section' },
+          h('div', { className:'dct-ai-newchat' },
+            h('strong', null, t('aiNewChat')),
+            h('span', null, t('aiNewChatHint'))),
           h('div', { className:'dct-ai-section-head' },
             h('h4', null, t('aiPrompt')),
             h('span', null, t('aiPromptNote'))),
@@ -272,16 +276,10 @@ export function makeCard(React, art, chat) {
               placeholder:t('aiGuidancePlaceholder'),
               onChange:event => setGuidance(event.target.value), 'aria-label':t('aiGuidance')
             })),
-          h('div', { className:'dct-ai-newchat' },
-            h('strong', null, t('aiNewChat')),
-            h('span', null, t('aiNewChatHint'))),
           h('div', { className:'dct-ai-row-actions' },
-            h('button', { type:'button', className:'dct-ai-primary', disabled:busy, onClick:fillChat }, t('aiFillChat')))),
-
-        h('div', { className:'dct-ai-section' },
-          h('div', { className:'dct-ai-section-head' },
-            h('h4', null, t('aiColorNote'))),
-          h('div', { className:'dct-ai-colors' }, modeBlock('light'), modeBlock('dark'))),
+            h('button', { type:'button', className:'dct-ai-primary', disabled:busy, onClick:fillChat }, t('aiFillChat')),
+            h('button', { type:'button', className:'dct-ai-link', onClick:downloadPrompt }, t('aiDownload')),
+            downloadNote ? h('span', { className:'dct-ai-ok' }, downloadNote) : null)),
 
         h('div', { className:'dct-ai-section' },
           h('div', { className:'dct-ai-section-head' },
@@ -298,11 +296,13 @@ export function makeCard(React, art, chat) {
             status ? h('span', { className:'dct-ai-ok' }, status) : null)),
 
         h('div', { className:'dct-ai-section' },
+          h('div', { className:'dct-ai-section-head' },
+            h('h4', null, t('aiColorNote'))),
+          h('div', { className:'dct-ai-colors' }, modeBlock('light'), modeBlock('dark'))),
+
+        h('div', { className:'dct-ai-section' },
           h('div', { className:'dct-ai-section-head' }, h('h4', null, t('aiPreview'))),
           h('div', { className:'dct-ai-previews' }, preview('light'), preview('dark'))),
-
-        h('p', { className:'dct-ai-fallback' },
-          h('button', { type:'button', className:'dct-ai-link', onClick:downloadPrompt }, t('aiDownload'))),
 
         h('div', { className:'dct-ai-footer' },
           h('button', { type:'button', className:'dct-mini', onClick:() => { setDraft(clone(initialPalette)); setError(''); setStatus(''); } }, t('aiReset')),

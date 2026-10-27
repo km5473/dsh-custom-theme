@@ -24,19 +24,62 @@
  */
 const PANELS = ':is(.v5IAXa_root,.kshsua_root,[data-dct-assistant],[class$="_userRow"] [class$="_bubble"],[class*="_userRow "] [class*="_bubble "])';
 
+/** The work-steps dropdown renders every step as a whole assistant message of
+ * its own, so each one carries its own markdown root. Decorating those roots
+ * drew a second card and a second blur ring inside the dropdown — a frame
+ * around a single step instead of around the answer. Panels therefore stop at
+ * that boundary; the step rows get no card at all. */
+const NOT_IN_STEPS = ':not([data-step-process-content] *)';
+const DECORATED = `${PANELS}${NOT_IN_STEPS}`;
+
+/** A reasoning disclosure: the frame the steps used to get by accident now
+ * belongs to the thinking box itself, so every thinking box looks the same
+ * whether it sits inline in the answer or inside the steps dropdown. It is a
+ * semantic hook (`data-variant="think"`), not a build hash. */
+const THINK = '[data-variant="think"]';
+/** Frost radius for the thinking box: exactly one pixel more than the 3px the
+ * message panels carry, so the box reads as the same material and not a step
+ * heavier. */
+const THINK_BLUR = 4;
+
 // Static Gaussian material: no canvas, SVG displacement or pointer animation.
 export function gaussianGlassCss() {
-  return `body[data-dct-material] ${PANELS}{position:relative;z-index:0;box-sizing:border-box;max-width:100%;min-width:0;padding:18px 22px;border:1px solid rgba(186,228,233,.32);border-radius:24px;background:rgba(21,40,59,.12);box-shadow:0 3px 12px rgba(7,25,40,.06);overflow-wrap:anywhere;color:#f3f8fc;text-shadow:0 1px 2px rgba(0,0,0,.22)}
-body[data-dct-material][data-dct-art="light"] ${PANELS}{background:rgba(250,248,242,.16);border-color:rgba(54,103,117,.28);color:#173447;text-shadow:none}
+  return `body[data-dct-material] ${DECORATED}{position:relative;z-index:0;box-sizing:border-box;max-width:100%;min-width:0;padding:18px 22px;border:1px solid rgba(186,228,233,.32);border-radius:24px;background:rgba(21,40,59,.12);box-shadow:0 3px 12px rgba(7,25,40,.06);overflow-wrap:anywhere;color:#f3f8fc;text-shadow:0 1px 2px rgba(0,0,0,.22)}
+body[data-dct-material][data-dct-art="light"] ${DECORATED}{background:rgba(250,248,242,.16);border-color:rgba(54,103,117,.28);color:#173447;text-shadow:none}
+/* Thinking boxes: the same frame the panels carry, so a reasoning row reads as
+   a box of its own wherever it is rendered. The frame follows the theme switch
+   rather than the Gaussian one — the box is structure, and it must not vanish
+   when the blur is off.
+   The host collapses a reasoning row to a fixed 24px height under
+   contain: size layout (on .lcKema_root:not([data-expanded])), so the frame's
+   padding left no content box at all and the single line spilled out of its own
+   border. Collapsed rows therefore size to their one line again: height auto,
+   and size containment dropped (layout containment stays). */
+body[data-dct-theme] ${THINK}{position:relative;z-index:0;box-sizing:border-box;max-width:100%;min-width:0;padding:6px 12px;border:1px solid rgba(186,228,233,.34);border-radius:24px;background:rgba(21,40,59,.14)}
+body[data-dct-theme] ${THINK}:not([data-expanded]){height:auto;contain:layout}
+body[data-dct-theme][data-dct-art="light"] ${THINK}{background:rgba(250,248,242,.20);border-color:rgba(54,103,117,.34)}
+/* A frost that does not depend on backdrop sampling: the wallpaper is painted a
+   second time inside the box, blurred and clipped to its rounded edge, so the box
+   reads as frosted glass even where backdrop-filter finds no backdrop to sample —
+   inside a scrolling dropdown, or in a transcript reopened from history. The
+   border is redrawn above that layer so the frost cannot cover it. */
+body[data-dct-theme][data-dct-art] ${THINK}{overflow:hidden;background-color:transparent;border-color:transparent}
+body[data-dct-art] ${THINK}::before{content:"";position:absolute;inset:-20px;z-index:-1;pointer-events:none;background-image:linear-gradient(rgba(21,40,59,.22),rgba(21,40,59,.22)),var(--dct-scene);background-size:cover;background-position:center;background-attachment:fixed;filter:blur(${THINK_BLUR}px) saturate(104%)}
+body[data-dct-art="light"] ${THINK}::before{background-image:linear-gradient(rgba(250,248,242,.30),rgba(250,248,242,.30)),var(--dct-scene)}
+body[data-dct-art] ${THINK}::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;box-shadow:inset 0 0 0 1px rgba(186,228,233,.34)}
+body[data-dct-art="light"] ${THINK}::after{box-shadow:inset 0 0 0 1px rgba(54,103,117,.34)}
 /* The material's own blur sits on a pseudo-element rather than on the panel: an
    element with backdrop-filter becomes a backdrop root, and the advanced-blur ring
    around the panel would then sample the panel's own paint instead of the page.
    The panel carries z-index:0 (a plain stacking context, which is NOT a backdrop
    root) so both pseudos can drop to z-index:-1 and paint behind the text. */
-body[data-dct-material] ${PANELS}::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:-1;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
-body[data-dct-material] ${PANELS} pre{max-width:100%;overflow-x:auto}
-@media(prefers-reduced-transparency:reduce){body[data-dct-material] ${PANELS}{background:#122d40}body[data-dct-material] ${PANELS}::before{backdrop-filter:none;-webkit-backdrop-filter:none}body[data-dct-material][data-dct-art="light"] ${PANELS}{background:#f4faf8}}
-@media(max-width:700px){body[data-dct-material] ${PANELS}{padding:14px 16px}}`;
+body[data-dct-material] ${DECORATED}::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:-1;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px)}
+/* The thinking box keeps its frost on the element itself: nothing else needs to
+   paint behind its text, so a pseudo-element would only add a stacking layer. */
+body[data-dct-material] ${DECORATED} pre{max-width:100%;overflow-x:auto}
+body[data-dct-theme] ${THINK} pre{max-width:100%;overflow-x:auto}
+@media(prefers-reduced-transparency:reduce){body[data-dct-material] ${DECORATED}{background:#122d40}body[data-dct-material] ${DECORATED}::before{backdrop-filter:none;-webkit-backdrop-filter:none}body[data-dct-material][data-dct-art="light"] ${DECORATED}{background:#f4faf8}body[data-dct-theme] ${THINK}{backdrop-filter:none;-webkit-backdrop-filter:none}}
+@media(max-width:700px){body[data-dct-material] ${DECORATED}{padding:14px 16px}body[data-dct-theme] ${THINK}{padding:5px 10px}}`;
 }
 
 /** Gaussian material markers: only discovers the reply renderer, so scrolling
@@ -124,9 +167,16 @@ body[data-dct-theme] ${COMPOSER_CARD}:has([class$="_input"], [class*="_input "])
    border for it. z-index:-1 keeps it under the panel's text (the panel is a
    stacking context), and the panel carries no backdrop-filter, so the ring really
    samples the page behind the panel. */
-body[data-dct-advblur] ${PANELS}::after{content:"";position:absolute;inset:-${ADVANCED_RING}px;box-sizing:border-box;padding:${ADVANCED_RING}px;border-radius:inherit;pointer-events:none;z-index:-1;backdrop-filter:blur(${ADVANCED_BLUR}px) saturate(104%);-webkit-backdrop-filter:blur(${ADVANCED_BLUR}px) saturate(104%);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:exclude}
+body[data-dct-advblur] ${DECORATED}::after{content:"";position:absolute;inset:-${ADVANCED_RING}px;box-sizing:border-box;padding:${ADVANCED_RING}px;border-radius:inherit;pointer-events:none;z-index:-1;backdrop-filter:blur(${ADVANCED_BLUR}px) saturate(104%);-webkit-backdrop-filter:blur(${ADVANCED_BLUR}px) saturate(104%);-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask-composite:exclude}
+/* The work-steps dropdown body only needs the horizontal overflow gone, but not
+   through a clipping scroll container: a backdrop-filter inside one only ever
+   samples the scroller's own contents, which is why the thinking boxes lost
+   their frost while the dropdown was open. The rows are kept inside the body's
+   width instead, so nothing overflows in the first place. */
+body[data-dct-theme] [data-step-process-content]{min-width:0;max-width:100%;box-sizing:border-box}
+body[data-dct-theme] [data-step-process-content]>*{min-width:0;max-width:100%}
 @media(prefers-reduced-transparency:reduce),(forced-colors:active){
-body[data-dct-advblur] ${PANELS}::after{content:none}
+body[data-dct-advblur] ${DECORATED}::after{content:none}
 }
 /* The permission and model pickers open in a portalled list surface (a direct
    child of body carrying the _portal_ / _list_ roles). The theme left it
@@ -162,5 +212,33 @@ body[data-dct-theme] [class*="menuAnchor"]{background:transparent!important;back
    that layer solid with the elevated layer, the same colour the portalled menus
    get. The shell's stylesheet has exactly one _material_ class and no installed
    plugin renders one, so the role token cannot hit anything else. */
-body[data-dct-theme] [class*="_material_"]{background:var(--dsw-alias-bg-layer-3);background-image:none;backdrop-filter:none;-webkit-backdrop-filter:none}`;
+body[data-dct-theme] [class*="_material_"]{background:var(--dsw-alias-bg-layer-3);background-image:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+/* Wide markdown tables: the host deliberately lets a 4+-column table break out
+   of the message column all the way to the chat area (AssistantMarkdown widens
+   it with container-query maths: spare = (100cqw - chat content width) / 2).
+   Inside the theme's padded, rounded message panel that breakout pushes the
+   table past the card edge, so the last columns hang outside the "chat box".
+   Cancel the breakout and pin the table to the message width instead. The
+   table may still wrap; the wrapper scrolls only when cells cannot shrink
+   (the host gives every cell a 100px minimum).
+   The 5px bottom padding the host reserves for the hidden scrollbar is dropped
+   too: the host zeroes it on :hover, and with the scrollbar now always
+   available that swap made the table jump while the pointer sat on the bar.
+   With one steady padding the bar appears once and stays put.
+   The host's :hover / :focus-visible override is more specific than the rule
+   below and flips overflow-x to scroll. On a table that fits, that forced a
+   12px-tall scrollbar into view on pointer-over and shoved the next line down,
+   so the same steady overflow-x:auto is repeated for those states. */
+body[data-dct-theme] .md-table-wide,
+body[data-dct-theme] .md-table-wide:hover,
+body[data-dct-theme] .md-table-wide:focus-visible{--dsh-table-spare:0px;--dsh-table-lead:0px;box-sizing:border-box;width:100%;max-width:100%;min-width:0;margin-left:0;padding-left:0;padding-bottom:0;overflow-x:auto;overscroll-behavior-x:contain}
+body[data-dct-theme] .md-table-wide>table{max-width:100%}
+/* The host's global scrollbar is 5px tall and the bar sits flush against the
+   table's bottom edge. The wider hit area is kept for comfort even though it was
+   not what made the bar feel undraggable: the layout swap on :hover was. A
+   transparent 3px border keeps the painted thumb 6px, so it still looks like the
+   rest of the UI. */
+body[data-dct-theme] .md-table-wide::-webkit-scrollbar{height:12px}
+body[data-dct-theme] .md-table-wide::-webkit-scrollbar-thumb{border:3px solid transparent}
+body[data-dct-theme] .md-table-wide::-webkit-scrollbar-track{background:transparent}`;
 }

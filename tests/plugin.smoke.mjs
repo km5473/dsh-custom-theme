@@ -541,6 +541,9 @@ test('the chat-panel blur switch drives the body marker and restores the markers
   root.dataset.bodyPrefix = 'v5IAXa';
   const body = makeElement('div');
   body.className = 'v5IAXa_body';
+  // A real answer carries markdown content.
+  const paragraph = makeElement('p');
+  body.appendChild(paragraph);
   root.appendChild(body);
   dom.body.appendChild(root);
 
